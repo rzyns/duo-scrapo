@@ -1,0 +1,21 @@
+[project]
+name = "duo-scrapo"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "crawlee[all]>=0.3.6",
+]
+
+[project.scripts]
+crawl = "duo_scrapo.crawler:crawl"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = [
+    "ipython>=8.27.0",
+]

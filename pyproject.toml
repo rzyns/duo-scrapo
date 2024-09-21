@@ -10,6 +10,7 @@ dependencies = [
 
 [project.scripts]
 crawl = "duo_scrapo.crawler:crawl"
+export = "duo_scrapo.export:run"
 
 [build-system]
 requires = ["hatchling"]

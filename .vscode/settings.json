@@ -2,6 +2,7 @@
     "python.analysis.autoImportCompletions": true,
     "python.analysis.diagnosticMode": "workspace",
     "python.analysis.extraCommitChars": true,
+    "python.analysis.extraPaths": ["src/duo_scrapo/typings"],
     "python.analysis.logLevel": "Warning",
     "python.analysis.typeCheckingMode": "strict",
     "python.analysis.typeEvaluation.enableExperimentalFeatures": true,
@@ -13,5 +14,9 @@
 
     "python.languageServer": "Pylance",
 
+
     "python.experiments.enabled": true,
+    "mypy-type-checker.importStrategy": "fromEnvironment",
+    "mypy-type-checker.preferDaemon": true,
+    "mypy-type-checker.reportingScope": "workspace",
 }

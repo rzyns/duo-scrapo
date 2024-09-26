@@ -1,29 +1,50 @@
 from _typeshed import Incomplete
-from typing import Literal, NoReturn
+from collections.abc import Iterable
+from typing import Final, Literal, NoReturn
 
 class _SwigNonDynamicMeta(type):
     __setattr__: Incomplete
 
-CONTINUOUS_NUMBERING: Literal[202]
-CONDITIONALLY_CASE_SENSITIVE: Literal[100]
-SKIP_WHITESPACES: Literal[301]
-ANALYSE_ONLY: Literal[401]
-GENERATE_ONLY: Literal[402]
-BOTH_ANALYSE_AND_GENERATE: Literal[403]
-__version__: Literal['1.99.9']
+CONTINUOUS_NUMBERING: Final = 202
+CONDITIONALLY_CASE_SENSITIVE: Final = 100
+SKIP_WHITESPACES: Final = 301
+ANALYSE_ONLY: Final = 401
+GENERATE_ONLY: Final = 402
+BOTH_ANALYSE_AND_GENERATE: Final = 403
+__version__: Final = '1.99.9'
 GENDERS: tuple[Literal['m1'], Literal['m2'], Literal['m3'], Literal['f'], Literal['n']]
 
+type Data = tuple[str, str, str, list[str], list[str]]
+type Interp = tuple[int, int, Data] | tuple[Data]
+
 class Morfeusz:
-    expand_dag: Incomplete
-    expand_tags: Incomplete
-    expand_dot: Incomplete
-    expand_underscore: Incomplete
-    def __init__(self, dict_name: str | None = None, dict_path: str | None = None, analyse: bool = True, generate: bool = True, expand_dag: bool = False, expand_tags: bool = False, expand_dot: bool = True, expand_underscore: bool = True, aggl: str | None = None, praet: str | None = None, separate_numbering: bool = True, case_handling=..., whitespace=...) -> None: ...
+    expand_dag: bool
+    expand_tags: bool
+    expand_dot: bool
+    expand_underscore: bool
+
+    def __init__(
+        self,
+        dict_name: str | None = None,
+        dict_path: str | None = None,
+        analyse: bool = True,
+        generate: bool = True,
+        expand_dag: bool = False,
+        expand_tags: bool = False,
+        expand_dot: bool = True,
+        expand_underscore: bool = True,
+        aggl: str | None = None,
+        praet: str | None = None,
+        separate_numbering: bool = True,
+        case_handling: Literal[100, 101, 102] = 100,
+        whitespace: Literal[301, 302, 303] = 301
+    ) -> None: ...
+
     def add_dictionary_path(self, dict_path: str) -> None: ...
-    def analyse(self, text: str): ...
+    def analyse(self, text: str) -> Iterable[Interp]: ...
     def generate(self, lemma: str, tag_id: str | None = None) -> list[tuple[str, str, str, list[NoReturn], list[NoReturn]]]: ...
-    def dict_id(self): ...
-    def dict_copyright(self): ...
+    def dict_id(self) -> str: ...
+    def dict_copyright(self) -> str: ...
 
 class SwigPyIterator:
     thisown: SwigPyIterator
@@ -189,11 +210,11 @@ class StringsSet:
     def insert(self, /, __x): ...
     __swig_destroy__: Incomplete
 
-SEPARATE_NUMBERING: Incomplete
-STRICTLY_CASE_SENSITIVE: Incomplete
-IGNORE_CASE: Incomplete
-APPEND_WHITESPACES: Incomplete
-KEEP_WHITESPACES: Incomplete
+SEPARATE_NUMBERING: Literal[201]
+STRICTLY_CASE_SENSITIVE: Literal[101]
+IGNORE_CASE: Literal[102]
+APPEND_WHITESPACES: Literal[302]
+KEEP_WHITESPACES: Literal[303]
 
 class _Morfeusz:
     thisown: Incomplete

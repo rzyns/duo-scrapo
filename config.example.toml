@@ -1,0 +1,19 @@
+[filter]
+exclude = [
+    # "on:A",
+    # "i:C",
+    # "i:I",
+    # "i:T",
+    # "nie:C",
+    # "nie:I",
+    # "nie:T",
+    # "tak:I",
+    # "tak:T",
+    # "tak:D",
+    # "dzięki:S",
+    # "dzięk",
+    # "dzięka",
+    # "dzięki:P",
+    # "dobranoc:S",
+    # "dobranoc:I"
+]

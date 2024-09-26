@@ -1,34 +1,124 @@
-from collections.abc import Sequence
-from typing import Self
+from pathlib import Path
+import json
+from typing import Literal, Protocol
+
 from attrs import define, field
-from morfeusz2 import Morfeusz
+import cattrs
+from pydantic import BaseModel, Field
+from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource
+
+from duo_scrapo.Morf import Morf, VocabularyWord, Word
+
+type Data = tuple[str, str, str, list[str], list[str]]
+type Interp = tuple[int, int, Data]
+
 
 @define
-class Word:
-    word: str = field()
-    root: str = field()
-    tags: list[str] = field()
-    raw_tag: str = field()
+class Nouny(Protocol):
+    number: Literal["sg", "pl"]
+    gender: Literal["m1", "m2", "m3", "f", "n"]
 
-class Morf:
-    morfeusz = Morfeusz()
+    nom:   str
+    gen:   str
+    dat:   str
+    acc:   str
+    loc:   str
+    instr: str
+    voc:   str
 
-    def analyze(self: Self, lemma: str):
-        result = self.morfeusz.analyse(lemma)
-        return result
 
-    def generate(self: Self, lemma: str, tag_id: str | None = None) -> Sequence[Word]:
-        result = self.morfeusz.generate(lemma, tag_id)
+@define
+class Verby(Word):
+    aspect: Literal["imperf", "perf"]
+    number: Literal["sg", "pl"]
+    person: Literal[1, 2, 3]
+    tense: Literal["praet", "pres", "fut"]
+    mood: Literal["indic", "imper", "cond", "subj"]
+    voice: Literal["act", "pass"]
 
-        words: list[Word] = []
-        for thing in result:
-            tags = thing[2].split(":")
-            words.append(
-                Word(word=thing[0], tags=tags, root=thing[1], raw_tag=thing[2])
-            )
 
-        return words
+def generate_mówić():  # noqa: PLC2401
+    m = Morf()
+    result = m.generate("mówić")
 
-m = Morf()
-result = m.analyze("mówienie")
-print(result)
+    for word in result:
+        print(word)
+
+    seen: list[str] = []
+    for word in result:
+        if word.lemma.word not in seen:
+            seen.append(word.lemma.word)
+            for generated in m.generate(word.lemma.word):
+                print(generated)
+            break
+
+    print(result)
+
+
+@define
+class AnkiCard:
+    word: Word = field()
+    definition: str = field()
+
+
+@define
+class Noun:
+    gender: Literal["m1", "m2", "m3", "f", "n"]
+    number: Literal["sg", "pl"]
+
+    nom:   Word = field()
+    gen:   Word = field()
+    dat:   Word = field()
+    acc:   Word = field()
+    loc:   Word = field()
+    instr: Word = field()
+    voc:   Word = field()
+
+
+@define
+class AnkiNounCard(AnkiCard):
+    singular: Noun = field()
+    plural: Noun = field()
+
+
+data = cattrs.structure(json.loads(Path("results.json").read_bytes()), list[VocabularyWord])
+m = Morf(dict_names=["sgjp"])
+
+
+class Filter(BaseModel):
+    exclude: list[str] = []
+
+
+class Settings(BaseSettings):
+    filter: Filter = Field(default=Filter())
+
+    model_config = SettingsConfigDict(toml_file='config.toml')
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        return (TomlConfigSettingsSource(settings_cls),)
+
+
+config = Settings()
+
+for vocab_word in data:
+    analysis = m.analyze(vocab_word.word)
+
+    print(f"{vocab_word.word}:")
+
+    for thing in analysis:
+        if thing.lemma.to_str() in config.filter.exclude:
+            continue
+
+        # if ("subst" in thing.tags and "nom" in thing.tags) \
+        #     or ("inf" in thing.tags) \
+        #     or (thing.lemma.word == vocab_word.word):
+
+        print("\t", thing)

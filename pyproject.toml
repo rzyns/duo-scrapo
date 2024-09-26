@@ -9,18 +9,57 @@ dependencies = [
     "cattrs>=24.1.1",
     "crawlee[all]>=0.3.6",
     "morfeusz2>=1.99.9",
+    "playwright>=1.47.0",
+    "pydantic>=2.9.2",
+    "pydantic-settings>=2.5.2",
+    "pymorfeusz2",
 ]
 
 [project.scripts]
 crawl = "duo_scrapo.crawler:crawl"
 export = "duo_scrapo.export:run"
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [tool.uv]
 dev-dependencies = [
     "ipython>=8.27.0",
     "mypy>=1.11.2",
+    "pre-commit>=3.8.0",
+    "pyright>=1.1.381",
+    "pytest>=8.3.3",
+    "ruff>=0.6.7",
 ]
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.uv.sources]
+pymorfeusz2 = { workspace = true }
+
+[tool.pyright]
+typeCheckingMode = "strict"
+exclude = ["**/node_modules", "**/__pycache__", "**/.*"]
+stubPath = "./typings"
+
+[tool.ruff]
+# extend-exclude = [ "typings" ]
+
+[tool.ruff.lint]
+preview = true
+select = [
+    "E", "W", "F", "UP", "ANN401", "ASYNC", "S", "FBT", "B", "A", "C4",
+    "DTZ", "ISC", "ICN", "PT", "PIE", "SIM", "TID", "FURB", "RUF",
+    "BLE", "PL", "FLY", "TRY"
+]
+ignore = [
+    "E501", "S101", "PLR0913", "PLR0917", "PLR0912", "PLR6301", "FBT001",
+    "FBT002", "S113", "ISC001"
+]
+
+[tool.ruff.lint.extend-per-file-ignores]
+"tests/test_*.py" = [
+    "S101", "PLR0913", "PLR0917", "PLR0912", "PLR6301", "FBT001", "FBT002", "PLR2004"
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

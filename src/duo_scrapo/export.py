@@ -3,12 +3,15 @@ from pydantic.dataclasses import dataclass
 from pydantic import TypeAdapter
 from anyio import Path
 
+
 @dataclass
 class VocabularyItem:
     word: str
     definition: str
 
+
 VocabularyList = TypeAdapter(list[VocabularyItem])
+
 
 async def main():
     data: list[VocabularyItem] = VocabularyList.validate_json(await Path('results.json').read_text(encoding="utf-8"))

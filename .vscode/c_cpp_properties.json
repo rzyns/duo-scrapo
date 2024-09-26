@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${HOME}/.local/share/mise/installs/python/latest/include",
+                "${workspaceFolder}/packages/pymorfeusz2/src/pymorfeusz2/include",
+                "${workspaceFolder}/**",
+                "${HOME}/.local/share/mise/installs/python/3.12.6/include/python3.12",
+                "${HOME}/git/duo-scrapo/.venv/lib/python3.12/site-packages/pybind11/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}

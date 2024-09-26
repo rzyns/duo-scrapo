@@ -1,0 +1,10 @@
+[env]
+_.python.venv = { create = false, path = ".venv" }
+
+[tools]
+python = "latest"
+lsd = "latest"
+uv = "latest"
+
+[settings]
+python_compile = false

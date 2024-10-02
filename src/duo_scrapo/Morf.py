@@ -1,10 +1,8 @@
 from typing import Literal, Self
-from collections.abc import Iterable, Iterator, MutableSet, Set, Hashable
+from collections.abc import Iterable, Iterator, Set, Hashable
 
 from morfeusz2 import Morfeusz
 from attrs import define, field
-
-from duo_scrapo.tag import Tag
 
 
 @define
@@ -40,11 +38,15 @@ class Lemma:
         return cls(word=word, tags=tags)
 
 
+def tags_from_str(string: str) -> Set[str]:
+    return frozenset({t for tag in string.split(":") for t in tag.split(".")})
+
+
 @define
 class Word(Hashable):
     word: str = field()
     lemma: Lemma = field()
-    tags: Set[Tag] = field(kw_only=True)
+    tags: Set[str] = field(kw_only=True, converter=tags_from_str)
     # raw_tag: str = field(kw_only=True)
     data1: Set[str] = field(kw_only=True, default=set(), repr=False)
     data2: Set[str] = field(kw_only=True, default=set(), repr=False)
@@ -58,7 +60,7 @@ class Analysis:
     word: str = field()
 
 
-class WordList(MutableSet[Word]):
+class WordList(Set[Word]):
     sequence: list[int]
     container: dict[int, Word]
 
@@ -143,10 +145,7 @@ class Morf:
                         w = Word(
                             word=word,
                             lemma=Lemma.from_str(lemma),
-                            tags={
-                                Tag(tt) for t in tag.split(":")
-                                    for tt in t.split(".")
-                            },
+                            tags=tag,
                             data1=set(data1),
                             data2=set(data2),
                         )
@@ -162,10 +161,9 @@ class Morf:
         for m in self.morfeuszes:
             result = m.generate(lemma, tag_id)
             for thing in result:
-                tags = [tt for t in thing[2].split(":") for tt in t.split(".")]
                 w = Word(
                     word=thing[0],
-                    tags={Tag(t) for t in tags},
+                    tags=thing[2],
                     lemma=Lemma.from_str(thing[1]),
                     # raw_tag=thing[2],
                 )

@@ -1,9 +1,9 @@
 import enum
 from enum import Enum, Flag, auto
-from duo_scrapo import str_flag as _
+from duo_scrapo import flag as _
 
 
-class FLG(_.StringFlag):
+class FLG(_.Flag):
     A = frozenset({"a"})
     B = frozenset({"b"})
     C = frozenset({"c"})
@@ -12,7 +12,7 @@ class FLG(_.StringFlag):
     E = A | B
 
 
-class BBB(_.StringFlag):
+class BBB(_.Flag):
     A = "a"
     B = "b"
 
@@ -62,5 +62,9 @@ def test_FLG():
     assert FLG.E > FLG.B
 
     assert str(FLG.A) == "a"
-    n = str(FLG.E)
-    assert n in {"a.b", "b.a"}
+    assert str(FLG.E) in {"a.b", "b.a"}
+
+
+def test_foo():
+    a = FLG("A")
+    assert a

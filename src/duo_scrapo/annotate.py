@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource
 
 from duo_scrapo.Morf import Morf, VocabularyWord, Word
+from duo_scrapo.tag import Tag
 
 type Data = tuple[str, str, str, list[str], list[str]]
 type Interp = tuple[int, int, Data]
@@ -114,11 +115,5 @@ for vocab_word in data:
     print(f"{vocab_word.word}:")
 
     for thing in analysis:
-        if thing.lemma.to_str() in config.filter.exclude:
-            continue
-
-        # if ("subst" in thing.tags and "nom" in thing.tags) \
-        #     or ("inf" in thing.tags) \
-        #     or (thing.lemma.word == vocab_word.word):
-
-        print("\t", thing)
+        if thing.tags & Tag.Case:
+            print("\t", thing)

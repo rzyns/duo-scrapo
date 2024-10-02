@@ -1,1 +1,1 @@
-from .Morf import Morf, Lemma, VocabularyWord, Word 
+from .Morf import Morf, Lemma, VocabularyWord, Word  # type: ignore #  noqa: F401

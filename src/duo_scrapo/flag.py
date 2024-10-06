@@ -1,18 +1,37 @@
 import enum
-from typing import Self, overload
+from typing import Any, Self, TypeGuard
 from collections.abc import Set
 
 
+def is_frozenset_str(obj: object) -> TypeGuard[frozenset[str]]:
+    if isinstance(obj, frozenset):
+        for i in obj:
+            i: Any
+            if not isinstance(i, str):
+                return False
+        return True
+    return False
+
+
 # class StringFlag(metaclass=enum.EnumType):
-class Flag(enum.Enum):  # noqa: PLR0904
+class Flag(enum.Enum):
     _value_: frozenset[str]
 
     @classmethod
-    def _missing_(cls, value: object):
-        if isinstance(value, str | frozenset):
-            a = object.__new__(cls)
-            cls.__init__(a, value)
-            return a
+    def _missing_(cls, value: str | frozenset[str] | object) -> Self | None:
+        if isinstance(value, str):
+            if value in cls.__members__:
+                return cls[value]
+            else:
+                return None
+        elif is_frozenset_str(value):
+            known = frozenset({s for v in cls.__members__.values() for s in v.value})
+            if value > known:
+                return None
+            obj = object.__new__(cls)
+            obj._name_ = repr(value)
+            obj._value_ = value
+            return obj
         return None
 
     def __init__(self, value: frozenset[str] | str):
@@ -24,52 +43,33 @@ class Flag(enum.Enum):  # noqa: PLR0904
             return self._value_ >= other._value_
         return self._value_ >= other
 
-    @overload
-    def __or__(self: Self, other: Self) -> Self: ...
-    @overload
-    def __or__(self: Self, other: Set[str]) -> Set[str]: ...
-    def __or__(self: Self, other: Self | Set[str]) -> Self | Set[str]:
-        if isinstance(other, Flag):
-            return type(self)(self._value_ | other._value_)
-        return type(self)(self._value_ | other)
+    def __eq__(self, value: object) -> bool:
+        a = self._value_
+        b = value._value_ if isinstance(value, Flag) else value
+        return a.__eq__(b)
 
-    @overload
-    def __ror__(self: Self, other: Self) -> Self: ...
-    @overload
-    def __ror__(self: Self, other: Set[str]) -> Set[str]: ...
-    def __ror__(self: Self, other: Self | Set[str]) -> Self | Set[str]:
+    def __or__(self: Self, other: Self | Set[str]):
+        if isinstance(other, Flag):
+            return self.__class__(self._value_ | other._value_)
+        return self.__class__(self._value_ | other)
+
+    def __ror__(self: Self, other: Self | Set[str]) -> Self:
         return self.__or__(other)
 
-    @overload
-    def __and__(self, other: Set[str]) -> Set[str]: ...
-    @overload
-    def __and__(self, other: Self) -> Self: ...
-    def __and__(self, other: Self | Set[str]) -> Self | Set[str]:
+    def __and__(self, other: Self | Set[str]) -> Self:
         if isinstance(other, Flag):
             return self.__class__(self._value_ & other._value_)
-        return self._value_ & other
+        return self.__class__(self._value_ & other)
 
-    @overload
-    def __rand__(self, other: Set[str]) -> Set[str]: ...
-    @overload
-    def __rand__(self, other: Self) -> Self: ...
-    def __rand__(self, other: Self | Set[str]) -> Self | Set[str]:
+    def __rand__(self, other: Self | Set[str]) -> Self:
         return self.__and__(other)
 
-    @overload
-    def __xor__(self, other: Self) -> Self: ...
-    @overload
-    def __xor__(self, other: Set[str]) -> Set[str]: ...
-    def __xor__(self, other: Self | Set[str]) -> Self | Set[str]:
+    def __xor__(self, other: Self | Set[str]) -> Self:
         if isinstance(other, Flag):
             return self.__class__(self._value_ ^ other._value_)
         return self.__class__(self._value_ ^ other)
 
-    @overload
-    def __rxor__(self, other: Self) -> Self: ...
-    @overload
-    def __rxor__(self, other: Set[str]) -> Set[str]: ...
-    def __rxor__(self, other: Self | Set[str]) -> Self | Set[str]:
+    def __rxor__(self, other: Self | Set[str]) -> Self:
         return self.__xor__(other)
 
     def __sub__(self, other: Self | Set[str]) -> Self:

@@ -1,15 +1,16 @@
+import pytest
 import enum
 from enum import Enum, Flag, auto
 from duo_scrapo import flag as _
 
 
 class FLG(_.Flag):
-    A = frozenset({"a"})
-    B = frozenset({"b"})
-    C = frozenset({"c"})
-    D = frozenset({"d"})
+    A = "a"
+    B = "b"
+    C = "c"
+    D = "d"
 
-    E = A | B
+    E = frozenset({"a", "b"})
 
 
 class BBB(_.Flag):
@@ -65,6 +66,38 @@ def test_FLG():
     assert str(FLG.E) in {"a.b", "b.a"}
 
 
+def test_only_allows_existing_members():
+    with pytest.raises(ValueError, match="is not a valid FLG"):
+        FLG("F")
+
+
 def test_foo():
+    assert FLG("A")
+    assert FLG("A") == FLG.A
+
     a = FLG("A")
-    assert a
+    b = FLG("B")
+    left = a & b
+    right = FLG.A & FLG.B
+    result = left == right
+    assert result
+
+    assert FLG("A") | FLG("B") == FLG.A | FLG.B
+    assert (FLG.A | FLG.B)._value_ == frozenset({"a", "b"})  # type: ignore[attr-defined]
+    assert FLG("A") | {"b"} == FLG.A | {"b"}
+
+    assert FLG("A") | {"b"} == FLG.A | {"b"}
+
+    actual = FLG.A | {"b"}
+    assert actual._value_ == frozenset({"a", "b"})  # type: ignore[attr-defined]
+    assert {"a"} | FLG("B") == {"a"} | FLG.B
+
+    assert FLG("A") & FLG("B") == FLG.A & FLG.B
+    assert FLG("A") & {"b"} == FLG.A & {"b"}
+    assert {"a"} & FLG("B") == {"a"} & FLG.B
+
+    assert FLG("A") ^ FLG("B") == FLG.A ^ FLG.B
+    assert FLG("A") ^ {"b"} == FLG.A ^ {"b"}
+    assert {"a"} ^ FLG("B") == {"a"} ^ FLG.B
+
+    assert FLG("A") - FLG("B") == FLG.A - FLG.B

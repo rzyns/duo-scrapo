@@ -13,6 +13,9 @@ dependencies = [
     "pydantic>=2.9.2",
     "pydantic-settings>=2.5.2",
     "pymorfeusz2",
+    "semantic-kernel>=1.11.0",
+    "transformers>=4.45.1",
+    "anki>=24.6.3",
 ]
 
 [project.scripts]

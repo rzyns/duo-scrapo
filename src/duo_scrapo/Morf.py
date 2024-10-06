@@ -4,6 +4,8 @@ from collections.abc import Iterable, Iterator, Set, Hashable
 from morfeusz2 import Morfeusz
 from attrs import define, field
 
+from duo_scrapo.tag import Tag
+
 
 @define
 class VocabularyWord:
@@ -93,6 +95,47 @@ class WordList(Set[Word]):
             self.sequence.remove(h)
 
 
+@define
+class _CaseForms:
+    mianownik: str
+    dopełniacz: str  # noqa: PLC2401
+    celownik: str
+    biernik: str
+    miejscownik: str
+    narzędnik: str  # noqa: PLC2401
+    wołacz: str  # noqa: PLC2401
+
+
+@define
+class NounForms:
+    rodzaj: Tag
+    liczba_pojedyncza: _CaseForms
+    liczba_mnoga: _CaseForms
+
+    def __repr__(self) -> str:
+        lines = [
+            f"rodzaj: {self.rodzaj}",
+            "liczba pojedyncza:",
+            f"    mianownik:   {self.liczba_pojedyncza.mianownik}",
+            f"    dopełniacz:  {self.liczba_pojedyncza.dopełniacz}",
+            f"    celownik:    {self.liczba_pojedyncza.celownik}",
+            f"    biernik:     {self.liczba_pojedyncza.biernik}",
+            f"    miejscownik: {self.liczba_pojedyncza.miejscownik}",
+            f"    narzędnik:   {self.liczba_pojedyncza.narzędnik}",
+            f"    wołacz:      {self.liczba_pojedyncza.wołacz}",
+            "liczba mnoga:",
+            f"    mianownik:   {self.liczba_mnoga.mianownik}",
+            f"    dopełniacz:  {self.liczba_mnoga.dopełniacz}",
+            f"    celownik:    {self.liczba_mnoga.celownik}",
+            f"    biernik:     {self.liczba_mnoga.biernik}",
+            f"    miejscownik: {self.liczba_mnoga.miejscownik}",
+            f"    narzędnik:   {self.liczba_mnoga.narzędnik}",
+            f"    wołacz:      {self.liczba_mnoga.wołacz}",
+        ]
+
+        return "\n".join(lines)
+
+
 class Morf:
     dict_names: list[str] = field()
     morfeuszes: list[Morfeusz]
@@ -172,3 +215,55 @@ class Morf:
                     # words.append(w)
 
         return words
+
+    class NotANounError(Exception):
+        """Raised when the word is not a noun"""
+
+    def decline_noun(self, noun: Word):
+        if not len((noun.tags & Tag.Case).value):
+            raise self.NotANounError()
+
+        forms = NounForms(
+            rodzaj=(Tag.Gender & noun.tags),
+            liczba_mnoga=_CaseForms(
+                mianownik="",
+                dopełniacz="",
+                celownik="",
+                biernik="",
+                miejscownik="",
+                narzędnik="",
+                wołacz="",
+            ),
+            liczba_pojedyncza=_CaseForms(
+                mianownik="",
+                dopełniacz="",
+                celownik="",
+                biernik="",
+                miejscownik="",
+                narzędnik="",
+                wołacz="",
+            ),
+        )
+
+        s = noun.lemma.to_str()
+        generated = self.generate(s)
+        for form in generated:
+            number = Tag.Number & form.tags
+            obj = forms.liczba_mnoga if number == Tag.PLURAL else forms.liczba_pojedyncza
+
+            if form.tags >= Tag.NOMINATIVE:
+                obj.mianownik = form.word
+            if form.tags >= Tag.GENITIVE:
+                obj.dopełniacz = form.word
+            if form.tags >= Tag.DATIVE:
+                obj.celownik = form.word
+            if form.tags >= Tag.ACCUSATIVE:
+                obj.biernik = form.word
+            if form.tags >= Tag.LOCATIVE:
+                obj.miejscownik = form.word
+            if form.tags >= Tag.INSTRUMENTAL:
+                obj.narzędnik = form.word
+            if form.tags >= Tag.VOCATIVE:
+                obj.wołacz = form.word
+
+        return forms

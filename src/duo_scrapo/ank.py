@@ -35,6 +35,24 @@ def add_fields_to_note_type(col: anki.collection.Collection, note_type: anki.mod
         mm.add_field(note_type, field)
 
 
+def add_template(col: anki.collection.Collection, note_type: anki.models.NoteType, template_name: str, qfmt: str, afmt: str) -> None:
+    """
+    Adds a template to the given NoteType in the provided Collection.
+
+    Parameters:
+    col (anki.collection.Collection): The Anki collection.
+    note_type (anki.models.NoteType): The NoteType to which the template will be added.
+    template_name (str): The name of the template.
+    qfmt (str): The question format.
+    afmt (str): The answer format.
+    """
+    mm = col.models
+    template = mm.new_template(template_name)
+    template['qfmt'] = qfmt
+    template['afmt'] = afmt
+    note_type['tmpls'].append(template)
+
+
 filepath = Path.cwd() / "output.anki2"
 if filepath.exists():
     filepath.unlink()
@@ -51,20 +69,17 @@ if czasowniki is None:
     mm = col.models
     new_note_type = mm.new("Czasowniki")
 
+    # Add the new Note Type to the collection
+    mm.add(new_note_type)
+
     # Add fields to the Note Type
     # mm.add_field(new_note_type, mm.new_field("Front"))
     # mm.add_field(new_note_type, mm.new_field("Back"))
     add_fields_to_note_type(col, new_note_type, ("pl", "en"))
     add_fields_to_note_type(col, new_note_type, VerbForms.get_cols())
 
-    # Add templates to the Note Type
-    template = mm.new_template("Card 1")
-    template['qfmt'] = "{{en}}"  # Question format
-    template['afmt'] = "{{FrontSide}}<hr id=\"answer\">{{pl}}"  # Answer format
-    new_note_type['tmpls'].append(template)
+    add_template(col, new_note_type, "Card 1", "{{en}}", "{{FrontSide}}<hr id=\"answer\">{{pl}}")
 
-    # Add the new Note Type to the collection
-    mm.add(new_note_type)
 
 czasowniki = col.models.by_name("Czasowniki")
 if czasowniki is None:

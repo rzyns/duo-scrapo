@@ -643,7 +643,12 @@ class VerbForms:
                 "",                                                      # przyszły 3p r pl
             )
         else:
-            raise ValueError("Invalid verb forms")
+            raise self.InvalidVerbFormError(self)
+
+    class InvalidVerbFormError(Exception):
+        """Raised when the verb form is invalid"""
+        def __init__(self, form: "VerbForms"):
+            super().__init__(f"Invalid verb form: {form.bezokolicznik}")
 
 
 class Morf:

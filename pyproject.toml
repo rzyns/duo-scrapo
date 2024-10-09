@@ -16,6 +16,8 @@ dependencies = [
     "semantic-kernel>=1.11.0",
     "transformers>=4.45.1",
     "anki>=24.6.3",
+    "rich>=13.9.2",
+    "aqt[qt6]>=24.6.3",
 ]
 
 [project.scripts]
@@ -36,6 +38,8 @@ dev-dependencies = [
 members = ["packages/*"]
 
 [tool.uv.sources]
+anki-connect-client = { workspace = true }
+anki-explorer = { workspace = true }
 pymorfeusz2 = { workspace = true }
 
 [tool.pyright]
@@ -55,7 +59,7 @@ select = [
 ]
 ignore = [
     "E501", "S101", "PLR0913", "PLR0917", "PLR0912", "PLR6301", "FBT001",
-    "FBT002", "S113", "ISC001"
+    "FBT002", "S113", "ISC001", "PLC2401"
 ]
 
 [tool.ruff.lint.extend-per-file-ignores]

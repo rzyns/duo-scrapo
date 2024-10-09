@@ -1,5 +1,4 @@
 import pytest
-import enum
 from enum import Enum, Flag, auto
 from duo_scrapo import flag as _
 
@@ -11,15 +10,6 @@ class FLG(_.Flag):
     D = "d"
 
     E = frozenset({"a", "b"})
-
-
-class BBB(_.Flag):
-    A = "a"
-    B = "b"
-
-    @enum.member
-    def C(self):
-        return self.A | self.B
 
 
 class StrEnum(Enum):

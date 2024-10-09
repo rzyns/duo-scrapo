@@ -52,6 +52,7 @@ class Tag(Flag):
     NEUTER = frozenset({"n"})
 
     Gender = MASCULINE_HUMAN | MASCULINE_VIRILE | MASCULINE_NONVIRILE | FEMININE | NEUTER
+    Masculine = MASCULINE_HUMAN | MASCULINE_VIRILE | MASCULINE_NONVIRILE
 
 
 # class Case(BaseTag):

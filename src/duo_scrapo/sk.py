@@ -1,8 +1,6 @@
 from semantic_kernel import Kernel
-from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion, AzureTextEmbedding
+from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.contents import ChatHistory
-
-from semantic_kernel.connectors.ai.chat_completion_client_base import ChatCompletionClientBase
 
 
 kernel = Kernel()

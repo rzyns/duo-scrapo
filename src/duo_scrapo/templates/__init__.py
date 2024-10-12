@@ -1,9 +1,9 @@
-import attrs
+from attrs import define, field
 
 
-@attrs.define
+@define
 class AnkiTemplate:
-    name: str = attrs.field()
-    question: str = attrs.field()
-    answer: str = attrs.field()
-    css: str = attrs.field(default="")
+    name: str = field()
+    qfmt: str = field(default="")
+    afmt: str = field(default="")
+    styling: str | None = field(default=None)

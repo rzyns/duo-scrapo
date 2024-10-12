@@ -54,16 +54,8 @@
 # przyszły_pl_3p_r: str
 
 
-from attrs import define
-
 from duo_scrapo.Morf import VerbForms
-
-
-@define
-class AnkiTemplate:
-    name: str
-    qfmt: str
-    afmt: str
+from . import AnkiTemplate
 
 
 def humanize_tense(tense: str) -> str:
@@ -88,7 +80,7 @@ def humanize_number(number: str) -> str:
             return number.capitalize()
 
 
-def humanize_person(person: str) -> str:
+def humanize_person(person: str, number: str) -> str:
     match person:
         case "1p":
             return "1st Person"
@@ -100,56 +92,79 @@ def humanize_person(person: str) -> str:
             return person.capitalize()
 
 
-def humanize_gender(gender: str) -> str:  # noqa: PLR0911
-    match gender:
-        case "m1":
-            return "Masculine Virile"
-        case "m2":
-            return "Masculine Non-Virile"
-        case "m3":
-            return "Masculine Inanimate"
-        case "f":
-            return "Feminine"
-        case "n":
-            return "Neuter"
-        case "r":
-            return "Common"
-        case _:
-            return gender.capitalize()
+def humanize_gender(gender: str) -> str:
+    # match gender:
+    #     case "m1":
+    #         return "Masculine Virile"
+    #     case "m2":
+    #         return "Masculine Non-Virile"
+    #     case "m3":
+    #         return "Masculine Inanimate"
+    #     case "f":
+    #         return "Feminine"
+    #     case "n":
+    #         return "Neuter"
+    #     case "r":
+    #         return "Common"
+    #     case _:
+    #         return gender.capitalize()
+    return gender
 
 
 def humanize_col_name(col_name: str) -> str:
     match col_name.split("_"):
         case [(tense), (number), (person), (gender)]:
             return " ".join([
-                humanize_tense(tense),
+                humanize_person(person, number),
                 humanize_number(number),
-                humanize_person(person),
+                humanize_tense(tense),
                 humanize_gender(gender),
             ])
         case [(tense), (number), (person)]:
             return " ".join([
-                humanize_tense(tense),
+                humanize_person(person, number),
                 humanize_number(number),
-                humanize_person(person),
+                f"({humanize_tense(tense)})",
             ])
         case _:
             return col_name.capitalize()
 
 
+def _field(s: str) -> str:
+    return "{{" + s + "}}"
+
+
+class TplA(AnkiTemplate):
+    pass
+
+
+class TplB(AnkiTemplate):
+    pass
+
+
 def _make_template(col: str):
     match col:
         case "bezokolicznik":
-            return AnkiTemplate(
+            return TplA(
                 name="Infinitive",
-                qfmt="{{en}} (Infinitive)",
-                afmt="{{FrontSide}}<hr id=\"answer\">{{{{bezokolicznik}}}}"
+                qfmt=f'{_field("en")} (Infinitive)',
+                afmt=f"{_field('FrontSide')}<hr id=\"answer\">{_field('bezokolicznik')} ({_field('aspekt')})",
             )
         case _:
-            return AnkiTemplate(
+            return TplB(
                 name=humanize_col_name(col),
-                qfmt=f"{{{{bezokolicznik}}}}\n({{{{{humanize_col_name(col)}}}}})",
-                afmt=f"{{{{FrontSide}}}}<hr id=\"answer\">{{{{{col}}}}}"
+                qfmt="\n".join([
+                    _field(f"#{col}"),
+                    f"{_field('bezokolicznik')} ({humanize_col_name(col)})",
+                    f"<p>{_field(f"type:{col}")}</p>",
+                    _field(f"/{col}"),
+                ]),
+                afmt="\n".join([
+                    _field("FrontSide"),
+                    '<hr id="answer">',
+                    f'<p class="field-{col}">{_field(col)}</p>',
+                    f'<p class="field-en">{_field("en")}</p>',
+                ]),
             )
 
 

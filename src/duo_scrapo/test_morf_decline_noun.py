@@ -1,5 +1,4 @@
-# from duo_scrapo import Morf, Word, Lemma
-from duo_scrapo import Morf
+from duo_scrapo.Morf import Morf
 from duo_scrapo.tag import Tag
 
 

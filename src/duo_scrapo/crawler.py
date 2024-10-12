@@ -12,14 +12,33 @@ from crawlee.configuration import Configuration
 
 INITIAL_URL = 'https://www.duolingo.com/learn'
 
+
+class MissingUserNameException(Exception):
+    def __init__(self, message: str = "Missing username"):
+        self.message = message
+        super().__init__(self.message)
+
+
+class MissingPasswordException(Exception):
+    def __init__(self, message: str = "Missing password"):
+        self.message = message
+        super().__init__(self.message)
+
+
+class WtfException(Exception):
+    def __init__(self, /, message: str = "Wtf"):
+        self.message = message
+        super().__init__(self.message)
+
+
 async def main() -> None:
     username = os.getenv('DUOLINGO_USERNAME')
     if not username:
-        raise Exception('Need username')
+        raise MissingUserNameException()
 
     password = os.getenv('DUOLINGO_PASSWORD')
     if not password:
-        raise Exception('Need password')
+        raise MissingPasswordException()
 
     crawler = PlaywrightCrawler(
         # Limit the crawl to max requests. Remove or increase it for crawling all links.
@@ -55,7 +74,6 @@ async def main() -> None:
                 await sleep(1.2)
                 await login_button.click()
 
-
     async def navigate_to_practice(context: PlaywrightCrawlingContext):
         practice_button = context.page.locator('a[data-test="practice-hub-nav"]')
         await practice_button.wait_for()
@@ -78,7 +96,6 @@ async def main() -> None:
 
         return total_words
 
-
     # Define the default request handler, which will be called for every request.
     # The handler receives a context parameter, providing various properties and
     # helper methods. Here are a few key ones we use for demonstration:
@@ -87,7 +104,7 @@ async def main() -> None:
     # - page: Playwright's Page object, which allows interaction with the web page
     #   (see https://playwright.dev/python/docs/api/class-page for more details).
     @crawler.router.default_handler
-    async def request_handler(context: PlaywrightCrawlingContext) -> None: # type: ignore
+    async def request_handler(context: PlaywrightCrawlingContext) -> None:  # type: ignore
         context.log.info(f'Processing {context.request.url} ...')
 
         if not await is_logged_in(context):
@@ -101,11 +118,11 @@ async def main() -> None:
         displayed_words = 0
 
         if total_words is None:
-            raise Exception(f"Wtf {total_words}")
+            raise WtfException(message=f"Wtf {total_words}")
 
         print("total_words", total_words)
 
-        data: list[dict[str, str | None]]= []
+        data: list[dict[str, str | None]] = []
 
         while displayed_words < total_words:
             try:
@@ -114,7 +131,7 @@ async def main() -> None:
                 await load_more.click()
                 await sleep(1)
                 displayed_words = len(await section.query_selector_all('ul li'))
-            except:
+            except:  # noqa: E722
                 break
 
         list_items = await section.query_selector_all('ul li>div')

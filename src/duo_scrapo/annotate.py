@@ -7,7 +7,8 @@ import cattrs
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource
 
-from duo_scrapo.Morf import Morf, VocabularyWord, Word
+from duo_scrapo.Morf import Morf, Word
+from duo_scrapo.words.vocab import TermDefinition
 
 type Data = tuple[str, str, str, list[str], list[str]]
 type Interp = tuple[int, int, Data]
@@ -81,7 +82,7 @@ class AnkiNounCard(AnkiCard):
     plural: Noun = field()
 
 
-data = cattrs.structure(json.loads(Path("results.json").read_bytes()), list[VocabularyWord])
+data = cattrs.structure(json.loads(Path("results.json").read_bytes()), list[TermDefinition])
 m = Morf(dict_names=["sgjp"])
 
 

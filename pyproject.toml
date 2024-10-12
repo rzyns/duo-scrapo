@@ -3,7 +3,7 @@ name = "duo-scrapo"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 dependencies = [
     "attrs>=24.2.0",
     "cattrs>=24.1.1",
@@ -14,7 +14,7 @@ dependencies = [
     "pydantic-settings>=2.5.2",
     "pymorfeusz2",
     "semantic-kernel>=1.11.0",
-    "transformers>=4.45.1",
+    # "transformers>=4.45.1",
     "anki>=24.6.3",
     "rich>=13.9.2",
     "aqt[qt6]>=24.6.3",
@@ -33,6 +33,7 @@ dev-dependencies = [
     "pytest>=8.3.3",
     "ruff>=0.6.7",
 ]
+override-dependencies = ["greenlet>3.0.3"]
 
 [tool.uv.workspace]
 members = ["packages/*"]
@@ -44,7 +45,13 @@ pymorfeusz2 = { workspace = true }
 
 [tool.pyright]
 typeCheckingMode = "strict"
-exclude = ["**/node_modules", "**/__pycache__", "**/.*"]
+exclude = [
+    "./base",
+    "**/morfeusz2.pyi",
+    "**/node_modules",
+    "**/__pycache__",
+    "**/.*",
+]
 stubPath = "./typings"
 
 [tool.ruff]
@@ -59,7 +66,7 @@ select = [
 ]
 ignore = [
     "E501", "S101", "PLR0913", "PLR0917", "PLR0912", "PLR6301", "FBT001",
-    "FBT002", "S113", "ISC001", "PLC2401"
+    "FBT002", "S113", "ISC001", "PLC2401", "PLC0414", "PLR0915"
 ]
 
 [tool.ruff.lint.extend-per-file-ignores]

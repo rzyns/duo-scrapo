@@ -1,5 +1,5 @@
 import enum
-from typing import Any, Self, TypeGuard, cast
+from typing import Any, Self, TypeIs, cast
 from collections.abc import Set
 
 
@@ -8,7 +8,7 @@ class UnsupportedOperandTypeError(TypeError):
         super().__init__(f"unsupported operand type(s) for 'in': '{class_name}' and '{other_class_name}'")
 
 
-def is_frozenset_str(obj: object) -> TypeGuard[frozenset[str]]:
+def is_frozenset_str(obj: object) -> TypeIs[frozenset[str]]:
     if isinstance(obj, frozenset):
         for i in obj:
             i: Any
@@ -18,7 +18,7 @@ def is_frozenset_str(obj: object) -> TypeGuard[frozenset[str]]:
     return False
 
 
-def is_set_str(obj: object) -> TypeGuard[Set[str]]:
+def is_set_str(obj: object) -> TypeIs[Set[str]]:
     if isinstance(obj, set | frozenset):
         for i in obj:
             i: Any

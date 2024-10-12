@@ -5,6 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debuger języka Python",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": []
+        },
+        {
             "name": "Pytest: test_str_flag.py",
             "type": "debugpy",
             "request": "launch",
@@ -12,6 +20,6 @@
             "args": [
                 "${workspaceFolder}/src/duo_scrapo/test_str_flag.py"
             ]
-        }
+        },
     ]
 }

@@ -26,10 +26,10 @@ export = "duo_scrapo.export:run"
 
 [tool.uv]
 dev-dependencies = [
+    "basedpyright>=1.18.4",
     "ipython>=8.27.0",
     "mypy>=1.11.2",
     "pre-commit>=3.8.0",
-    "pyright>=1.1.381",
     "pytest>=8.3.3",
     "ruff>=0.6.7",
 ]
@@ -39,11 +39,10 @@ override-dependencies = ["greenlet>3.0.3"]
 members = ["packages/*"]
 
 [tool.uv.sources]
-anki-connect-client = { workspace = true }
 anki-explorer = { workspace = true }
 pymorfeusz2 = { workspace = true }
 
-[tool.pyright]
+[tool.basedpyright]
 typeCheckingMode = "strict"
 exclude = [
     "./base",

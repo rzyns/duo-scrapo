@@ -54,7 +54,7 @@
 # przyszły_pl_3p_r: str
 
 
-from duo_scrapo.Morf import VerbForms
+from ..Morf import VerbForms  # noqa: TID252
 from . import AnkiTemplate
 
 

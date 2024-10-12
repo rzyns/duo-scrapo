@@ -1,6 +1,6 @@
 import morfeusz2
 
-from duo_scrapo.words.vocab import TermDefinition
+from .words.vocab import TermDefinition
 
 from .Morf import Morf, Word
 

@@ -1,6 +1,6 @@
 import pytest
 from enum import Enum, Flag, auto
-from duo_scrapo import flag as _
+from . import flag as _
 
 
 class FLG(_.Flag):

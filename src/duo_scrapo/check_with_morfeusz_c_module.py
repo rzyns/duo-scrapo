@@ -4,7 +4,7 @@ import json
 import cattrs
 from morfeusz2 import Morfeusz
 
-from duo_scrapo.words.vocab import TermDefinition
+from .words.vocab import TermDefinition
 
 
 def run_stuff():

@@ -5,9 +5,9 @@ from collections.abc import Iterable, Iterator, Set, Hashable
 from morfeusz2 import Morfeusz
 from attrs import define, field
 
-from duo_scrapo.tag import Tag
-from duo_scrapo.words.nouns import NounForms, CaseForms
-from duo_scrapo.words.verbs import VerbForms
+from .tag import Tag
+from .words.nouns import NounForms, CaseForms
+from .words.verbs import VerbForms
 
 
 @define(hash=True)

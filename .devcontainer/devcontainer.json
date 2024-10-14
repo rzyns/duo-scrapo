@@ -17,7 +17,8 @@
 				"1password.op-vscode",
 				"ms-python.debugpy",
 				"ms-python.python",
-				"detachhead.basedpyright"
+				"detachhead.basedpyright",
+				"qwtel.sqlite-viewer"
 			]
 		}
 	}

@@ -143,6 +143,9 @@ class CsvRow(NamedTuple):
     przyszły_pl_3p_m1: str
     przyszły_pl_3p_r: str
 
+    is_perfect: str
+    is_imperfect: str
+
 
 @define
 class VerbForms:
@@ -221,7 +224,7 @@ class VerbForms:
     # def czas_przeszły(self) -> Numbered[_VerbPersonForms[GenderedSingular[str]], _VerbPersonForms[GenderedPlural[str]]]:
     @property
     def czas_przyszły(self) -> Numbered[VerbPersonForms[str], VerbPersonForms[str]] | Numbered[VerbPersonForms[GenderedSingular[str]], VerbPersonForms[GenderedPlural[str]]]:
-        if self.aspekt == Tag.IMPERFECTIVE:
+        if self.is_perfective():
             return self._czas_teraźniejszy
 
         return Numbered(
@@ -264,13 +267,8 @@ class VerbForms:
             ),
         )
 
-    @classmethod
-    def _is_teraz(cls, forms: Numbered[VerbPersonForms[str], VerbPersonForms[str]] | Numbered[VerbPersonForms[GenderedSingular[str]], VerbPersonForms[GenderedPlural[str]]]) -> TypeIs[Numbered[VerbPersonForms[str], VerbPersonForms[str]]]:
-        return isinstance(forms.liczba_mnoga.pierwsza_osoba, str)
-
-    @classmethod
-    def _is_gendered(cls, forms: Numbered[VerbPersonForms[str], VerbPersonForms[str]] | Numbered[VerbPersonForms[GenderedSingular[str]], VerbPersonForms[GenderedPlural[str]]]) -> TypeIs[Numbered[VerbPersonForms[GenderedSingular[str]], VerbPersonForms[GenderedPlural[str]]]]:
-        return isinstance(forms.liczba_mnoga.pierwsza_osoba, GenderedPlural)
+    def is_perfective(self, forms: None | Numbered[VerbPersonForms[str], VerbPersonForms[str]] | Numbered[VerbPersonForms[GenderedSingular[str]], VerbPersonForms[GenderedPlural[str]]] = None) -> TypeIs[Numbered[VerbPersonForms[str], VerbPersonForms[str]]]:
+        return bool(self.aspekt & Tag.PERFECTIVE)
 
     @staticmethod
     def get_cols() -> CsvRow:
@@ -328,69 +326,75 @@ class VerbForms:
             "przyszły_pl_2p_r",
             "przyszły_pl_3p_m1",
             "przyszły_pl_3p_r",
+
+            "_is_perfect",
+            "_is_imperfect",
         )
 
     def as_dict(self) -> dict[str, str]:
         return dict(zip(self.get_cols(), self.to_rows(), strict=True))
 
     def to_rows(self) -> CsvRow:
-        if self._is_gendered(self.czas_przyszły):
+        if not self.is_perfective(self.czas_przyszły):
             return CsvRow(
                 str(self.aspekt),
                 self.bezokolicznik,
 
-                 self.czas_teraźniejszy.liczba_pojedyncza.pierwsza_osoba,  # teraz    sg 1p
-                 self.czas_teraźniejszy.liczba_pojedyncza.druga_osoba,     # teraz    sg 2p
-                 self.czas_teraźniejszy.liczba_pojedyncza.trzecia_osoba,   # teraz    sg 3p
-                 self.czas_teraźniejszy.liczba_mnoga.pierwsza_osoba,       # teraz    pl 1p
-                 self.czas_teraźniejszy.liczba_mnoga.druga_osoba,          # teraz    pl 2p
-                 self.czas_teraźniejszy.liczba_mnoga.trzecia_osoba,        # teraz    pl 3p
+                self.czas_teraźniejszy.liczba_pojedyncza.pierwsza_osoba,  # teraz    sg 1p
+                self.czas_teraźniejszy.liczba_pojedyncza.druga_osoba,     # teraz    sg 2p
+                self.czas_teraźniejszy.liczba_pojedyncza.trzecia_osoba,   # teraz    sg 3p
+                self.czas_teraźniejszy.liczba_mnoga.pierwsza_osoba,       # teraz    pl 1p
+                self.czas_teraźniejszy.liczba_mnoga.druga_osoba,          # teraz    pl 2p
+                self.czas_teraźniejszy.liczba_mnoga.trzecia_osoba,        # teraz    pl 3p
 
-                 self.czas_przeszły.liczba_pojedyncza.pierwsza_osoba.m1,   # przeszły sg 1p m1
-                 self.czas_przeszły.liczba_pojedyncza.pierwsza_osoba.m2,   # przeszły sg 1p m2
-                 self.czas_przeszły.liczba_pojedyncza.pierwsza_osoba.m3,   # przeszły sg 1p m3
-                 self.czas_przeszły.liczba_pojedyncza.pierwsza_osoba.f,    # przeszły sg 1p f
-                 self.czas_przeszły.liczba_pojedyncza.pierwsza_osoba.n,    # przeszły sg 1p n
-                 self.czas_przeszły.liczba_pojedyncza.druga_osoba.m1,      # przeszły sg 2p m1
-                 self.czas_przeszły.liczba_pojedyncza.druga_osoba.m2,      # przeszły sg 2p m2
-                 self.czas_przeszły.liczba_pojedyncza.druga_osoba.m3,      # przeszły sg 2p m3
-                 self.czas_przeszły.liczba_pojedyncza.druga_osoba.f,       # przeszły sg 2p f
-                 self.czas_przeszły.liczba_pojedyncza.druga_osoba.n,       # przeszły sg 2p n
-                 self.czas_przeszły.liczba_pojedyncza.trzecia_osoba.m1,    # przeszły sg 3p m1
-                 self.czas_przeszły.liczba_pojedyncza.trzecia_osoba.m2,    # przeszły sg 3p m2
-                 self.czas_przeszły.liczba_pojedyncza.trzecia_osoba.m3,    # przeszły sg 3p m3
-                 self.czas_przeszły.liczba_pojedyncza.trzecia_osoba.f,     # przeszły sg 3p f
-                 self.czas_przeszły.liczba_pojedyncza.trzecia_osoba.n,     # przeszły sg 3p n
-                 self.czas_przeszły.liczba_mnoga.pierwsza_osoba.m1,        # przeszły pl 1p m1
-                 self.czas_przeszły.liczba_mnoga.pierwsza_osoba.reszta,    # przeszły pl 1p r
-                 self.czas_przeszły.liczba_mnoga.druga_osoba.m1,           # przeszły pl 2p m1
-                 self.czas_przeszły.liczba_mnoga.druga_osoba.reszta,       # przeszły pl 2p r
-                 self.czas_przeszły.liczba_mnoga.trzecia_osoba.m1,         # przeszły pl 3p m1
-                 self.czas_przeszły.liczba_mnoga.trzecia_osoba.reszta,     # przeszły pl 3p r
+                self.czas_przeszły.liczba_pojedyncza.pierwsza_osoba.m1,   # przeszły sg 1p m1
+                self.czas_przeszły.liczba_pojedyncza.pierwsza_osoba.m2,   # przeszły sg 1p m2
+                self.czas_przeszły.liczba_pojedyncza.pierwsza_osoba.m3,   # przeszły sg 1p m3
+                self.czas_przeszły.liczba_pojedyncza.pierwsza_osoba.f,    # przeszły sg 1p f
+                self.czas_przeszły.liczba_pojedyncza.pierwsza_osoba.n,    # przeszły sg 1p n
+                self.czas_przeszły.liczba_pojedyncza.druga_osoba.m1,      # przeszły sg 2p m1
+                self.czas_przeszły.liczba_pojedyncza.druga_osoba.m2,      # przeszły sg 2p m2
+                self.czas_przeszły.liczba_pojedyncza.druga_osoba.m3,      # przeszły sg 2p m3
+                self.czas_przeszły.liczba_pojedyncza.druga_osoba.f,       # przeszły sg 2p f
+                self.czas_przeszły.liczba_pojedyncza.druga_osoba.n,       # przeszły sg 2p n
+                self.czas_przeszły.liczba_pojedyncza.trzecia_osoba.m1,    # przeszły sg 3p m1
+                self.czas_przeszły.liczba_pojedyncza.trzecia_osoba.m2,    # przeszły sg 3p m2
+                self.czas_przeszły.liczba_pojedyncza.trzecia_osoba.m3,    # przeszły sg 3p m3
+                self.czas_przeszły.liczba_pojedyncza.trzecia_osoba.f,     # przeszły sg 3p f
+                self.czas_przeszły.liczba_pojedyncza.trzecia_osoba.n,     # przeszły sg 3p n
+                self.czas_przeszły.liczba_mnoga.pierwsza_osoba.m1,        # przeszły pl 1p m1
+                self.czas_przeszły.liczba_mnoga.pierwsza_osoba.reszta,    # przeszły pl 1p r
+                self.czas_przeszły.liczba_mnoga.druga_osoba.m1,           # przeszły pl 2p m1
+                self.czas_przeszły.liczba_mnoga.druga_osoba.reszta,       # przeszły pl 2p r
+                self.czas_przeszły.liczba_mnoga.trzecia_osoba.m1,         # przeszły pl 3p m1
+                self.czas_przeszły.liczba_mnoga.trzecia_osoba.reszta,     # przeszły pl 3p r
 
-                 self.czas_przyszły.liczba_pojedyncza.pierwsza_osoba.m1,   # przyszły sg 1p m1
-                 self.czas_przyszły.liczba_pojedyncza.pierwsza_osoba.m2,   # przyszły sg 1p m2
-                 self.czas_przyszły.liczba_pojedyncza.pierwsza_osoba.m3,   # przyszły sg 1p m3
-                 self.czas_przyszły.liczba_pojedyncza.pierwsza_osoba.f,    # przyszły sg 1p f
-                 self.czas_przyszły.liczba_pojedyncza.pierwsza_osoba.n,    # przyszły sg 1p n
-                 self.czas_przyszły.liczba_pojedyncza.druga_osoba.m1,      # przyszły sg 2p m1
-                 self.czas_przyszły.liczba_pojedyncza.druga_osoba.m2,      # przyszły sg 2p m2
-                 self.czas_przyszły.liczba_pojedyncza.druga_osoba.m3,      # przyszły sg 2p m3
-                 self.czas_przyszły.liczba_pojedyncza.druga_osoba.f,       # przyszły sg 2p f
-                 self.czas_przyszły.liczba_pojedyncza.druga_osoba.n,       # przyszły sg 2p n
-                 self.czas_przyszły.liczba_pojedyncza.trzecia_osoba.m1,    # przyszły sg 3p m1
-                 self.czas_przyszły.liczba_pojedyncza.trzecia_osoba.m2,    # przyszły sg 3p m2
-                 self.czas_przyszły.liczba_pojedyncza.trzecia_osoba.m3,    # przyszły sg 3p m3
-                 self.czas_przyszły.liczba_pojedyncza.trzecia_osoba.f,     # przyszły sg 3p f
-                 self.czas_przyszły.liczba_pojedyncza.trzecia_osoba.n,     # przyszły sg 3p n
-                 self.czas_przyszły.liczba_mnoga.pierwsza_osoba.m1,        # przyszły pl 1p m1
-                 self.czas_przyszły.liczba_mnoga.pierwsza_osoba.reszta,    # przyszły pl 1p r
-                 self.czas_przyszły.liczba_mnoga.druga_osoba.m1,           # przyszły pl 2p m1
-                 self.czas_przyszły.liczba_mnoga.druga_osoba.reszta,       # przyszły pl 2p r
-                 self.czas_przyszły.liczba_mnoga.trzecia_osoba.m1,         # przyszły pl 3p m1
-                 self.czas_przyszły.liczba_mnoga.trzecia_osoba.reszta,     # przyszły pl 3p r
+                self.czas_przyszły.liczba_pojedyncza.pierwsza_osoba.m1,   # przyszły sg 1p m1
+                self.czas_przyszły.liczba_pojedyncza.pierwsza_osoba.m2,   # przyszły sg 1p m2
+                self.czas_przyszły.liczba_pojedyncza.pierwsza_osoba.m3,   # przyszły sg 1p m3
+                self.czas_przyszły.liczba_pojedyncza.pierwsza_osoba.f,    # przyszły sg 1p f
+                self.czas_przyszły.liczba_pojedyncza.pierwsza_osoba.n,    # przyszły sg 1p n
+                self.czas_przyszły.liczba_pojedyncza.druga_osoba.m1,      # przyszły sg 2p m1
+                self.czas_przyszły.liczba_pojedyncza.druga_osoba.m2,      # przyszły sg 2p m2
+                self.czas_przyszły.liczba_pojedyncza.druga_osoba.m3,      # przyszły sg 2p m3
+                self.czas_przyszły.liczba_pojedyncza.druga_osoba.f,       # przyszły sg 2p f
+                self.czas_przyszły.liczba_pojedyncza.druga_osoba.n,       # przyszły sg 2p n
+                self.czas_przyszły.liczba_pojedyncza.trzecia_osoba.m1,    # przyszły sg 3p m1
+                self.czas_przyszły.liczba_pojedyncza.trzecia_osoba.m2,    # przyszły sg 3p m2
+                self.czas_przyszły.liczba_pojedyncza.trzecia_osoba.m3,    # przyszły sg 3p m3
+                self.czas_przyszły.liczba_pojedyncza.trzecia_osoba.f,     # przyszły sg 3p f
+                self.czas_przyszły.liczba_pojedyncza.trzecia_osoba.n,     # przyszły sg 3p n
+                self.czas_przyszły.liczba_mnoga.pierwsza_osoba.m1,        # przyszły pl 1p m1
+                self.czas_przyszły.liczba_mnoga.pierwsza_osoba.reszta,    # przyszły pl 1p r
+                self.czas_przyszły.liczba_mnoga.druga_osoba.m1,           # przyszły pl 2p m1
+                self.czas_przyszły.liczba_mnoga.druga_osoba.reszta,       # przyszły pl 2p r
+                self.czas_przyszły.liczba_mnoga.trzecia_osoba.m1,         # przyszły pl 3p m1
+                self.czas_przyszły.liczba_mnoga.trzecia_osoba.reszta,     # przyszły pl 3p r
+
+                "",                                                       # _is_perfect
+                "1",                                                      # _is_imperfect
              )
-        elif self._is_teraz(self.czas_przyszły):
+        else:
             return CsvRow(
                 str(self.aspekt),
                 self.bezokolicznik,
@@ -444,9 +448,10 @@ class VerbForms:
                 "",                                                      # przyszły 2p r  pl
                 self.czas_przyszły.liczba_mnoga.trzecia_osoba,           # przyszły 3p m1 pl
                 "",                                                      # przyszły 3p r pl
+
+                "1",                                                     # "_is_perfect",
+                "",                                                      # "_is_imperfect",
             )
-        else:
-            raise self.InvalidVerbFormError(self)
 
     class InvalidVerbFormError(Exception):
         """Raised when the verb form is invalid"""

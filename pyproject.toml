@@ -27,7 +27,9 @@ export = "duo_scrapo.export:run"
 [tool.uv]
 dev-dependencies = [
     "basedpyright>=1.18.4",
+    "genanki>=0.13.1",
     "ipython>=8.27.0",
+    "monkeytype>=23.3.0",
     "mypy>=1.11.2",
     "pre-commit>=3.8.0",
     "pytest>=8.3.3",
@@ -46,7 +48,6 @@ pymorfeusz2 = { workspace = true }
 typeCheckingMode = "strict"
 exclude = [
     "./base",
-    "**/morfeusz2.pyi",
     "**/node_modules",
     "**/__pycache__",
     "**/.*",
@@ -65,7 +66,7 @@ select = [
 ]
 ignore = [
     "E501", "S101", "PLR0913", "PLR0917", "PLR0912", "PLR6301", "FBT001",
-    "FBT002", "S113", "ISC001", "PLC2401", "PLC0414", "PLR0915"
+    "FBT002", "S113", "ISC001", "PLC2401", "PLC0414", "PLR0915", "PLR0911"
 ]
 
 [tool.ruff.lint.extend-per-file-ignores]

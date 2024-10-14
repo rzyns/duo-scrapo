@@ -1,137 +1,28 @@
-# aspekt: str
-
-# bezokolicznik: str
-
-# teraz_sg_1p: str
-# teraz_sg_2p: str
-# teraz_sg_3p: str
-# teraz_pl_1p: str
-# teraz_pl_2p: str
-# teraz_pl_3p: str
-
-# przeszły_sg_1p_m1: str
-# przeszły_sg_1p_m2: str
-# przeszły_sg_1p_m3: str
-# przeszły_sg_1p_f: str
-# przeszły_sg_1p_n: str
-# przeszły_sg_2p_m1: str
-# przeszły_sg_2p_m2: str
-# przeszły_sg_2p_m3: str
-# przeszły_sg_2p_f: str
-# przeszły_sg_2p_n: str
-# przeszły_sg_3p_m1: str
-# przeszły_sg_3p_m2: str
-# przeszły_sg_3p_m3: str
-# przeszły_sg_3p_f: str
-# przeszły_sg_3p_n: str
-# przeszły_pl_1p_m1: str
-# przeszły_pl_1p_r: str
-# przeszły_pl_2p_m1: str
-# przeszły_pl_2p_r: str
-# przeszły_pl_3p_m1: str
-# przeszły_pl_3p_r: str
-
-# przyszły_sg_1p_m1: str
-# przyszły_sg_1p_m2: str
-# przyszły_sg_1p_m3: str
-# przyszły_sg_1p_f: str
-# przyszły_sg_1p_n: str
-# przyszły_sg_2p_m1: str
-# przyszły_sg_2p_m2: str
-# przyszły_sg_2p_m3: str
-# przyszły_sg_2p_f: str
-# przyszły_sg_2p_n: str
-# przyszły_sg_3p_m1: str
-# przyszły_sg_3p_m2: str
-# przyszły_sg_3p_m3: str
-# przyszły_sg_3p_f: str
-# przyszły_sg_3p_n: str
-# przyszły_pl_1p_m1: str
-# przyszły_pl_1p_r: str
-# przyszły_pl_2p_m1: str
-# przyszły_pl_2p_r: str
-# przyszły_pl_3p_m1: str
-# przyszły_pl_3p_r: str
-
-
 from ..Morf import VerbForms  # noqa: TID252
-from . import AnkiTemplate
-
-
-def humanize_tense(tense: str) -> str:
-    match tense:
-        case "teraz":
-            return "Present"
-        case "przeszły":
-            return "Past"
-        case "przyszły":
-            return "Future"
-        case _:
-            return tense.capitalize()
-
-
-def humanize_number(number: str) -> str:
-    match number:
-        case "sg":
-            return "Singular"
-        case "pl":
-            return "Plural"
-        case _:
-            return number.capitalize()
-
-
-def humanize_person(person: str, number: str) -> str:
-    match person:
-        case "1p":
-            return "1st Person"
-        case "2p":
-            return "2nd Person"
-        case "3p":
-            return "3rd Person"
-        case _:
-            return person.capitalize()
-
-
-def humanize_gender(gender: str) -> str:
-    # match gender:
-    #     case "m1":
-    #         return "Masculine Virile"
-    #     case "m2":
-    #         return "Masculine Non-Virile"
-    #     case "m3":
-    #         return "Masculine Inanimate"
-    #     case "f":
-    #         return "Feminine"
-    #     case "n":
-    #         return "Neuter"
-    #     case "r":
-    #         return "Common"
-    #     case _:
-    #         return gender.capitalize()
-    return gender
+from . import AnkiTemplate, cond, dedent, end_cond, field, front, humanize_gender, humanize_number, humanize_person, humanize_tense
 
 
 def humanize_col_name(col_name: str) -> str:
     match col_name.split("_"):
         case [(tense), (number), (person), (gender)]:
-            return " ".join([
-                humanize_person(person, number),
-                humanize_number(number),
-                humanize_tense(tense),
-                humanize_gender(gender),
-            ])
+            return " ".join(
+                [
+                    humanize_person(person, number),
+                    humanize_number(number),
+                    humanize_tense(tense),
+                    humanize_gender(gender),
+                ]
+            )
         case [(tense), (number), (person)]:
-            return " ".join([
-                humanize_person(person, number),
-                humanize_number(number),
-                f"({humanize_tense(tense)})",
-            ])
+            return " ".join(
+                [
+                    humanize_person(person, number),
+                    humanize_number(number),
+                    f"({humanize_tense(tense)})",
+                ]
+            )
         case _:
             return col_name.capitalize()
-
-
-def _field(s: str) -> str:
-    return "{{" + s + "}}"
 
 
 class TplA(AnkiTemplate):
@@ -142,29 +33,166 @@ class TplB(AnkiTemplate):
     pass
 
 
+def _make_conjugation_table() -> str:
+    return dedent(f"""
+        {cond("_is_imperfect")}
+        <table>
+            <tbody>
+                <tr>
+                    <th colspan="2" > &nbsp; </th>
+                    <th colspan="5"> singular </th>
+                    <th colspan="2"> plural </th>
+                </tr>
+                <tr>
+                    <th> &nbsp; </th>
+                    <th> <b>pers.</b> </th>
+                    <th align="center"> <i>m1.</i> </th>
+                    <th align="center"> <i>m2.</i> </th>
+                    <th align="center"> <i>m3.</i> </th>
+                    <th align="center"> <i>f.</i> </th>
+                    <th align="center"> <i>n.</i> </th>
+                    <th align="center"> personal&nbsp;<i>m.</i> </th>
+                    <th align="center"> <i>f.</i>&nbsp;/&nbsp;<i>n.</i>&nbsp;/&nbsp;<i>non-personal</i> <i>m.</i> </th>
+                </tr>
+                <tr>
+                    <th align="center"> bezokolicznik </th>
+                    <td> &nbsp; </td>
+                    <td colspan="8" align="center"> {field("bezokolicznik")} </td>
+                </tr>
+                <tr class="czas_teraźniejszy">
+                    <th rowspan="3"> czas teraźniejszy </th>
+                    <td> 1st </td>
+                    <td colspan="5" align="center"> {field("teraz_sg_1p")} </td>
+                    <td colspan="2" align="center"> {field("teraz_pl_1p")} </td>
+                </tr>
+                <tr class="czas_teraźniejszy">
+                    <td> 2nd </td>
+                    <td colspan="5" align="center"> {field("teraz_sg_2p")} </td>
+                    <td colspan="2" align="center"> {field("teraz_pl_2p")} </td>
+                </tr>
+                <tr class="czas_teraźniejszy">
+                    <td> 3rd </td>
+                    <td colspan="5" align="center"> {field("teraz_sg_3p")} </td>
+                    <td colspan="2" align="center"> {field("teraz_pl_3p")} </td>
+                </tr>
+                <tr class="czas_przeszły">
+                    <th rowspan="3"> czas przeszły </th>
+                    <td> 1st </td>
+                    <td> {field("przeszły_sg_1p_m1")} </td>
+                    <td> {field("przeszły_sg_1p_m2")} </td>
+                    <td> {field("przeszły_sg_1p_m3")} </td>
+                    <td> {field("przeszły_sg_1p_f")} </td>
+                    <td> {field("przeszły_sg_1p_n")} </td>
+                    <td> {field("przeszły_pl_1p_m1")} </td>
+                    <td> {field("przeszły_pl_1p_r")} </td>
+                </tr>
+                <tr class="czas_przeszły">
+                    <td> 2nd </td>
+                    <td> {field("przeszły_sg_2p_m1")} </td>
+                    <td> {field("przeszły_sg_2p_m2")} </td>
+                    <td> {field("przeszły_sg_2p_m3")} </td>
+                    <td> {field("przeszły_sg_2p_f")} </td>
+                    <td> {field("przeszły_sg_2p_n")} </td>
+                    <td> {field("przeszły_pl_3p_m1")} </td>
+                    <td> {field("przeszły_pl_3p_r")} </td>
+                </tr>
+                <tr class="czas_przeszły">
+                    <td> 3rd </td>
+                    <td> {field("przeszły_sg_3p_m1")} </td>
+                    <td> {field("przeszły_sg_3p_m2")} </td>
+                    <td> {field("przeszły_sg_3p_m3")} </td>
+                    <td> {field("przeszły_sg_3p_f")} </td>
+                    <td> {field("przeszły_sg_3p_n")} </td>
+                    <td> {field("przeszły_pl_3p_m1")} </td>
+                    <td> {field("przeszły_pl_3p_r")} </td>
+                </tr>
+                <tr class="czas_przyszły">
+                    <th rowspan="3"> czas przyszły </th>
+                    <td> 1st </td>
+                    <td> {field("przyszły_sg_1p_m1")}<sup>1</sup> </td>
+                    <td> {field("przyszły_sg_1p_m2")}<sup>1</sup> </td>
+                    <td> {field("przyszły_sg_1p_m3")}<sup>1</sup> </td>
+                    <td> {field("przyszły_sg_1p_f")}<sup>1</sup> </td>
+                    <td> {field("przyszły_sg_1p_n")}<sup>1</sup> </td>
+                    <td> {field("przyszły_pl_1p_m1")}<sup>1</sup> </td>
+                    <td> {field("przyszły_pl_1p_r")}<sup>1</sup> </td>
+                </tr>
+                <tr class="czas_przyszły">
+                    <td> 2nd </td>
+                    <td> {field("przyszły_sg_2p_m1")}<sup>1</sup> </td>
+                    <td> {field("przyszły_sg_2p_m2")}<sup>1</sup> </td>
+                    <td> {field("przyszły_sg_2p_m3")}<sup>1</sup> </td>
+                    <td> {field("przyszły_sg_2p_f")}<sup>1</sup> </td>
+                    <td> {field("przyszły_sg_2p_n")}<sup>1</sup> </td>
+                    <td> {field("przyszły_pl_2p_m1")}<sup>1</sup> </td>
+                    <td> {field("przyszły_pl_2p_r")}<sup>1</sup> </td>
+                </tr>
+                <tr class="czas_przyszły">
+                    <td> 3rd </td>
+                    <td> {field("przyszły_sg_3p_m1")}<sup>1</sup> </td>
+                    <td> {field("przyszły_sg_3p_m2")}<sup>1</sup> </td>
+                    <td> {field("przyszły_sg_3p_m3")}<sup>1</sup> </td>
+                    <td> {field("przyszły_sg_3p_f")}<sup>1</sup> </td>
+                    <td> {field("przyszły_sg_3p_n")}<sup>1</sup> </td>
+                    <td> {field("przyszły_pl_3p_m1")}<sup>1</sup> </td>
+                    <td> {field("przyszły_pl_3p_r")}<sup>1</sup> </td>
+                </tr>
+                <tr>
+                    <td colspan="8" align="left"> <sup>1</sup> &nbsp; <i>or:</i> będę {field("bezokolicznik")}, będziesz {field("bezokolicznik")} etc.</td>
+                </tr>
+            </tbody>
+        </table>
+        {end_cond("_is_imperfect")}
+    """)
+
+
 def _make_template(col: str):
     match col:
         case "bezokolicznik":
             return TplA(
                 name="Infinitive",
-                qfmt=f'{_field("en")} (Infinitive)',
-                afmt=f"{_field('FrontSide')}<hr id=\"answer\">{_field('bezokolicznik')} ({_field('aspekt')})",
+                qfmt=dedent(
+                    f"""
+                    {field("en")} (Infinitive)
+                    """
+                ),
+                afmt=dedent(
+                    f"""
+                    {front()}
+                    <hr id="answer">
+                    {field('bezokolicznik')} ({field('aspekt')})
+                    <hr id="conjugation">
+                    {_make_conjugation_table()}
+                    """
+                ),
             )
         case _:
             return TplB(
                 name=humanize_col_name(col),
-                qfmt="\n".join([
-                    _field(f"#{col}"),
-                    f"{_field('bezokolicznik')} ({humanize_col_name(col)})",
-                    f"<p>{_field(f"type:{col}")}</p>",
-                    _field(f"/{col}"),
-                ]),
-                afmt="\n".join([
-                    _field("FrontSide"),
-                    '<hr id="answer">',
-                    f'<p class="field-{col}">{_field(col)}</p>',
-                    f'<p class="field-en">{_field("en")}</p>',
-                ]),
+                qfmt=dedent(
+                    f"""
+                    {cond(col)}
+                        {field('bezokolicznik')} ({humanize_col_name(col)})
+                        <p>{field(f"type:{col}")}</p>
+                    {end_cond(col)}
+                    """
+                ),
+                afmt=dedent(
+                    f"""
+                    {front()}
+
+                    <hr id="answer">
+
+                    <p class="field-{col}">
+                        {field(col)}
+                    </p>
+                    <p class="field-en">
+                        {field("en")}
+                    </p>
+                    <hr id="conjugation">
+                    {_make_conjugation_table()}
+                    """
+                ),
             )
 
 

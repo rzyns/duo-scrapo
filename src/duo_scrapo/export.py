@@ -1,11 +1,32 @@
 from collections.abc import Generator, Iterable
 
-from duo_scrapo.Morf import Morf, VerbForms
+from duo_scrapo.Morf import Morf
 from duo_scrapo.tag import Tag
+from duo_scrapo.words.verbs import VerbForms
+from duo_scrapo.words.nouns import NounForms
 from duo_scrapo.words.vocab import TermDefinition, load_vocabulary
 
 
-def export_rzeczowniki(data: Iterable[TermDefinition], morf: Morf | None = None):
+def export_rzeczowniki(data: Iterable[TermDefinition], morf: Morf | None = None) -> Generator[tuple[TermDefinition, NounForms]]:
+    m = morf or Morf()
+
+    seen_words: list[str] = []
+
+    for vocab_word in data:
+        analysis = m.analyze(vocab_word.term)
+
+        for thing in analysis:
+            if thing.tags & Tag.Case and thing.lemma.word not in seen_words:
+                forms = m.decline_noun(thing)
+                if forms is None:
+                    continue
+
+                seen_words.append(thing.lemma.word)
+
+                yield (vocab_word, forms)
+
+
+def zexport_rzeczowniki(data: Iterable[TermDefinition], morf: Morf | None = None) -> Generator[tuple[TermDefinition, NounForms]]:
     columns = [
         "pl",
         "en",
@@ -43,6 +64,7 @@ def export_rzeczowniki(data: Iterable[TermDefinition], morf: Morf | None = None)
 
                     seen_words.append(thing.lemma.word)
 
+                    yield (vocab_word, forms)
                     print(forms)
 
                     f.write("\t".join([
@@ -93,4 +115,4 @@ if __name__ == "__main__":
     m = Morf(dict_names=["sgjp"])
 
     export_czasowniki(data, m)
-    # export_rzeczowniki()
+    export_rzeczowniki(data, m)

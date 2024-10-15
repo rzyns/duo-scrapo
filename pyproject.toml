@@ -18,6 +18,7 @@ dependencies = [
     "anki>=24.6.3",
     "rich>=13.9.2",
     "aqt[qt6]>=24.6.3",
+    "pytest-monkeytype>=1.1.0",
 ]
 
 [project.scripts]
@@ -27,7 +28,7 @@ export = "duo_scrapo.export:run"
 [tool.uv]
 dev-dependencies = [
     "basedpyright>=1.18.4",
-    "genanki>=0.13.1",
+    "genanki",
     "ipython>=8.27.0",
     "monkeytype>=23.3.0",
     "mypy>=1.11.2",
@@ -43,6 +44,7 @@ members = ["packages/*"]
 [tool.uv.sources]
 anki-explorer = { workspace = true }
 pymorfeusz2 = { workspace = true }
+genanki = { workspace = true }
 
 [tool.basedpyright]
 typeCheckingMode = "strict"
@@ -53,6 +55,7 @@ exclude = [
     "**/.*",
 ]
 stubPath = "./typings"
+reportPrivateUsage = false
 
 [tool.ruff]
 # extend-exclude = [ "typings" ]
@@ -72,6 +75,9 @@ ignore = [
 [tool.ruff.lint.extend-per-file-ignores]
 "tests/test_*.py" = [
     "S101", "PLR0913", "PLR0917", "PLR0912", "PLR6301", "FBT001", "FBT002", "PLR2004"
+]
+"packages/genanki/**/*.py" = [
+    "TRY002", "TRY003", "PLR0904"
 ]
 
 [build-system]

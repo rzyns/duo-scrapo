@@ -13,12 +13,13 @@
             "args": []
         },
         {
-            "name": "Pytest: test_str_flag.py",
+            "name": "Pytest",
             "type": "debugpy",
             "request": "launch",
             "module": "pytest",
             "args": [
-                "${workspaceFolder}/src/duo_scrapo/test_str_flag.py"
+                "--monkeytype-output",
+                "${workspaceFolder}/monkeytype.sqlite3",
             ]
         },
     ]

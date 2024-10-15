@@ -331,6 +331,7 @@ def main():
             }
             th { background-color: silver; }
             td { border: 1px solid black; }
+
         """)
     )
 

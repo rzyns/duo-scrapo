@@ -19,6 +19,9 @@ import itertools
 from collections.abc import Callable, Iterable
 from typing import TypeIs
 
+from attrs import asdict
+from genanki.model import Model
+
 from ..Morf import NounForms  # noqa: TID252
 from . import AnkiTemplate, dedent, field
 
@@ -174,4 +177,31 @@ templates = flatmap(
         lambda name: name not in {"en", "pl"},
         NounForms.get_cols(),
     ),
+)
+
+MODEL_ID_RZECZOWNIKI = 2026523460
+
+model = Model(
+    model_id=MODEL_ID_RZECZOWNIKI,
+    name="Rzeczowniki",
+    fields=[
+        {"name": col}
+        for col in ("en", "pl", *NounForms.get_cols())
+    ],
+    templates=[
+        asdict(a)
+        for a in templates
+    ],
+    css=dedent("""
+        table {
+            font-size: .75rem;
+            line-height: 1rem;
+            margin-bottom: .5rem;
+            margin-top: .5rem;
+            width: 100%;
+        }
+        th { background-color: silver; }
+        td { border: 1px solid black; }
+
+    """)
 )

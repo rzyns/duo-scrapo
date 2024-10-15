@@ -100,6 +100,14 @@ class NounForms:
             lm_wołacz=self.liczba_mnoga.wołacz,
         )
 
+    @classmethod
+    def empty(cls, empty: str | Callable[[], str]) -> Self:
+        return cls(
+            rodzaj=Tag(frozenset({})),
+            liczba_pojedyncza=CaseForms.empty(empty),
+            liczba_mnoga=CaseForms.empty(empty),
+        )
+
     def __repr__(self) -> str:
         lines = [
             f"rodzaj: {self.rodzaj}",

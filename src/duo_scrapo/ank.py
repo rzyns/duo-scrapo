@@ -14,13 +14,15 @@ from attrs import define
 from pydantic import ConfigDict, TypeAdapter, with_config
 from rich import print  # noqa: A004
 
-# import duo_scrapo.templates.czasowniki
 from duo_scrapo.Morf import VerbForms
 from duo_scrapo.templates import AnkiTemplate, dedent
 import duo_scrapo.templates.czasowniki
 import duo_scrapo.templates.rzeczowniki
-from duo_scrapo.export import export_czasowniki, export_rzeczowniki
+import duo_scrapo.templates.przymiotniki
+import duo_scrapo.templates.zaimki
+from duo_scrapo.export import export, export_czasowniki, export_rzeczowniki
 from duo_scrapo.words.nouns import NounForms
+from duo_scrapo.words.pronouns import PronounForms
 from duo_scrapo.words.vocab import load_vocabulary
 import genanki
 import genanki.card
@@ -31,8 +33,6 @@ import genanki.util
 
 
 DECK_ID = 2103513676
-MODEL_ID_CZASOWNIKI = 2057651084
-MODEL_ID_RZECZOWNIKI = 2026523460
 
 
 class ModelAlreadyExistsError(Exception):
@@ -192,7 +192,7 @@ def add_czasowniki_to_collection(col: anki.collection.Collection, collection_nam
         czasowniki = col.models.new("Czasowniki")
 
     czasowniki = to_model(czasowniki)
-    czasowniki["id"] = MODEL_ID_CZASOWNIKI
+    czasowniki["id"] = duo_scrapo.templates.czasowniki.MODEL_ID_CZASOWNIKI
 
     # Dodaj pola do typu notatki
     # add_fields_to_note_type(col, new_note_type, ("Front", "Back", "pl", "en"))
@@ -235,7 +235,7 @@ def add_rzeczowniki_to_collection(col: anki.collection.Collection, collection_na
         rzeczowniki = col.models.new("Rzeczowniki")
 
     rzeczowniki = to_model(rzeczowniki)
-    rzeczowniki["id"] = MODEL_ID_RZECZOWNIKI
+    rzeczowniki["id"] = duo_scrapo.templates.rzeczowniki.MODEL_ID_RZECZOWNIKI
 
     # Dodaj pola do typu notatki
     add_fields_to_note_type(col, rzeczowniki, ("pl", "en"))
@@ -308,44 +308,26 @@ def zmain():
 
 
 def main():
-    deck = genanki.Deck(DECK_ID, name="DuoScrapo")
-
-    model = genanki.model.Model(
-        model_id=MODEL_ID_CZASOWNIKI,
-        name="Czasowniki",
-        fields=[
-            {"name": col}
-            for col in ("en", "pl", *VerbForms.get_cols())
-        ],
-        templates=[
-            asdict(a)
-            for a in duo_scrapo.templates.czasowniki.templates
-        ],
-        css=dedent("""
-            table {
-                font-size: .75rem;
-                line-height: 1rem;
-                margin-bottom: .5rem;
-                margin-top: .5rem;
-                width: 100%;
-            }
-            th { background-color: silver; }
-            td { border: 1px solid black; }
-
-        """)
-    )
-
-    deck.add_model(model)
+    deck = genanki.Deck(anki.decks.DeckId(DECK_ID), name="DuoScrapo")
+    deck.add_model(duo_scrapo.templates.czasowniki.model)
 
     vocab = load_vocabulary()
-    for (word, forms) in export_czasowniki(vocab):
+    for (word, forms, _) in export(vocab):
         fields = (word.definition, word.term, *forms.to_rows())
-        note = genanki.note.Note(
+
+        if isinstance(forms, VerbForms):
+            model = duo_scrapo.templates.czasowniki.model
+        elif isinstance(forms, NounForms):
+            model = duo_scrapo.templates.rzeczowniki.model
+        elif isinstance(forms, PronounForms):
+            model = duo_scrapo.templates.zaimki.model
+        else:
+            model = duo_scrapo.templates.przymiotniki.model
+
+        deck.add_note(genanki.note.Note(
             model=model,
             fields=list(fields),
-        )
-
-        deck.add_note(note)
+        ))
 
     genanki.Package(deck).write_to_file("deck.apkg")
 

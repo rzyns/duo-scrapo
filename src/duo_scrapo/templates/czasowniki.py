@@ -1,5 +1,7 @@
+from genanki.model import Model
 from ..Morf import VerbForms  # noqa: TID252
 from . import AnkiTemplate, cond, dedent, end_cond, field, front, humanize_gender, humanize_number, humanize_person, humanize_tense
+from attr import asdict
 
 
 def humanize_col_name(col_name: str) -> str:
@@ -203,3 +205,30 @@ templates = [
         VerbForms.get_cols(),
     )
 ]
+
+MODEL_ID_CZASOWNIKI = 2057651084
+
+model = Model(
+    model_id=MODEL_ID_CZASOWNIKI,
+    name="Czasowniki",
+    fields=[
+        {"name": col}
+        for col in ("en", "pl", *VerbForms.get_cols())
+    ],
+    templates=[
+        asdict(a)
+        for a in templates
+    ],
+    css=dedent("""
+        table {
+            font-size: .75rem;
+            line-height: 1rem;
+            margin-bottom: .5rem;
+            margin-top: .5rem;
+            width: 100%;
+        }
+        th { background-color: silver; }
+        td { border: 1px solid black; }
+
+    """)
+)

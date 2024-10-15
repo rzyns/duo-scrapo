@@ -1,3 +1,7 @@
+from attrs import asdict
+from genanki.model import Model
+
+from duo_scrapo.words.adjectives import AdjectiveForms
 from ..Morf import VerbForms  # noqa: TID252
 from . import AnkiTemplate, cond, dedent, end_cond, field, front, humanize_gender, humanize_number
 
@@ -74,3 +78,31 @@ templates = [
         VerbForms.get_cols(),
     )
 ]
+
+
+MODEL_ID_PRZYMIOTNIKI = 2120170845
+
+model = Model(
+    model_id=MODEL_ID_PRZYMIOTNIKI,
+    name="Przymiotniki",
+    fields=[
+        {"name": col}
+        for col in ("en", "pl", *AdjectiveForms.get_cols())
+    ],
+    templates=[
+        asdict(a)
+        for a in templates
+    ],
+    css=dedent("""
+        table {
+            font-size: .75rem;
+            line-height: 1rem;
+            margin-bottom: .5rem;
+            margin-top: .5rem;
+            width: 100%;
+        }
+        th { background-color: silver; }
+        td { border: 1px solid black; }
+
+    """)
+)

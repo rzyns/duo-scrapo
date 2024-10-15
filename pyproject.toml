@@ -19,6 +19,7 @@ dependencies = [
     "rich>=13.9.2",
     "aqt[qt6]>=24.6.3",
     "pytest-monkeytype>=1.1.0",
+    "genanki",
 ]
 
 [project.scripts]
@@ -28,7 +29,6 @@ export = "duo_scrapo.export:run"
 [tool.uv]
 dev-dependencies = [
     "basedpyright>=1.18.4",
-    "genanki",
     "ipython>=8.27.0",
     "monkeytype>=23.3.0",
     "mypy>=1.11.2",

@@ -65,6 +65,7 @@ async def main() -> None:
 
             email_input = await context.page.query_selector('input[data-test="email-input"]')
             password_input = await context.page.query_selector('input[data-test="password-input"]')
+            await context.page.wait_for_timeout(30000)
             login_button = await context.page.query_selector('button[data-test="register-button"]')
 
             if email_input is not None and password_input is not None and login_button is not None:

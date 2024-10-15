@@ -5,8 +5,12 @@ from collections.abc import Iterable, Iterator, Set, Hashable
 from morfeusz2 import Morfeusz
 from attrs import define, field
 
+from duo_scrapo.words.adjectives import AdjectiveForms, CaseForms
+from duo_scrapo.words.forms import GenderedSingular
+from duo_scrapo.words.pronouns import PronounForms
+
 from .tag import Tag
-from .words.nouns import NounForms, CaseForms
+from .words.nouns import NounForms
 from .words.verbs import VerbForms
 
 
@@ -61,6 +65,9 @@ class Word(Hashable):
 
     def is_verb(self) -> bool:
         return bool(self.tags >= Tag.INFINITIVE)
+
+    def is_pron(self) -> bool:
+        return bool(self.tags >= Tag.PPRON12) or bool(self.tags >= Tag.PPRON3)
 
 
 @define
@@ -185,42 +192,165 @@ class Morf:
     class NotANounError(Exception):
         """Raised when the word is not a noun"""
 
-    def decline_noun(self, noun: str | Word):
+    def decline_adjective(self, adj: str | Word):
         def reducer(acc: Word | None, cur: Word):
-            if cur.lemma.to_str() == (noun if isinstance(noun, str) else noun.word):
+            if cur.lemma.to_str() == (adj if isinstance(adj, str) else adj.word):
                 return cur
             return acc
 
-        word = reduce(
-            reducer,
-            list(self.analyze(noun)),
-            Word(word=noun, lemma=Lemma(word=noun, tags=""), tags="", data1=set(), data2=set())
-        ) if isinstance(noun, str) else reducer(None, noun)
+        if isinstance(adj, str):
+            word = reduce(
+                reducer,
+                list(self.analyze(adj)),
+                Word(word=adj, lemma=Lemma(word=adj, tags=""), tags="", data1=set(), data2=set())
+            )
+        else:
+            word = reducer(adj, adj)
+
+        if word is None or not word.is_adj():
+            return None
+
+        forms = AdjectiveForms.empty(CaseForms.empty(""))
+
+        s = word.lemma.to_str()
+        generated = self.generate(s)
+        for form in generated:
+            numbers = Tag.Number & form.tags
+            genders = Tag.Gender & form.tags
+            obj: CaseForms
+            # obj = forms.liczba_mnoga if number == Tag.PLURAL else forms.liczba_pojedyncza
+            for number in numbers:
+                for gender in genders:
+                    a = forms.liczba_mnoga if number == Tag.PLURAL else forms.liczba_pojedyncza
+                    if isinstance(a, GenderedSingular):
+                        match gender:
+                            case "m1":
+                                obj = a.m1
+                            case "m2":
+                                obj = a.m2
+                            case "m3":
+                                obj = a.m3
+                            case "f":
+                                obj = a.f
+                            case "n":
+                                obj = a.n
+                            case _:
+                                continue
+                    else:
+                        match gender:
+                            case "m1":
+                                obj = a.m1
+                            case "reszta":
+                                obj = a.reszta
+                            case _:
+                                continue
+
+                    if form.tags >= Tag.NOMINATIVE:
+                        obj.mianownik = form.word
+                    if form.tags >= Tag.GENITIVE:
+                        obj.dopełniacz = form.word
+                    if form.tags >= Tag.DATIVE:
+                        obj.celownik = form.word
+                    if form.tags >= Tag.ACCUSATIVE:
+                        obj.biernik = form.word
+                    if form.tags >= Tag.LOCATIVE:
+                        obj.miejscownik = form.word
+                    if form.tags >= Tag.INSTRUMENTAL:
+                        obj.narzędnik = form.word
+                    if form.tags >= Tag.VOCATIVE:
+                        obj.wołacz = form.word
+
+        return forms if (not forms.liczba_mnoga.m1.is_empty() and not forms.liczba_pojedyncza.is_empty()) else None
+
+    def decline_pronoun(self, pron: str | Word):
+        def reducer(acc: Word | None, cur: Word):
+            if cur.lemma.to_str() == (pron if isinstance(pron, str) else pron.word):
+                return cur
+            return acc
+
+        if isinstance(pron, str):
+            word = reduce(
+                reducer,
+                list(self.analyze(pron)),
+                Word(word=pron, lemma=Lemma(word=pron, tags=""), tags="", data1=set(), data2=set())
+            )
+        else:
+            word = reducer(pron, pron)
+
+        if word is None or not word.is_pron():
+            return None
+
+        forms = PronounForms.empty(CaseForms.empty(""))
+
+        s = word.lemma.to_str()
+        generated = self.generate(s)
+        for form in generated:
+            numbers = Tag.Number & form.tags
+            genders = Tag.Gender & form.tags
+            obj: CaseForms
+            # obj = forms.liczba_mnoga if number == Tag.PLURAL else forms.liczba_pojedyncza
+            for number in numbers:
+                for gender in genders:
+                    a = forms.liczba_mnoga if number == Tag.PLURAL else forms.liczba_pojedyncza
+                    if isinstance(a, GenderedSingular):
+                        match gender:
+                            case "m1":
+                                obj = a.m1
+                            case "m2":
+                                obj = a.m2
+                            case "m3":
+                                obj = a.m3
+                            case "f":
+                                obj = a.f
+                            case "n":
+                                obj = a.n
+                            case _:
+                                continue
+                    else:
+                        match gender:
+                            case "m1":
+                                obj = a.m1
+                            case "reszta":
+                                obj = a.reszta
+                            case _:
+                                continue
+
+                    if form.tags >= Tag.NOMINATIVE:
+                        obj.mianownik = form.word
+                    if form.tags >= Tag.GENITIVE:
+                        obj.dopełniacz = form.word
+                    if form.tags >= Tag.DATIVE:
+                        obj.celownik = form.word
+                    if form.tags >= Tag.ACCUSATIVE:
+                        obj.biernik = form.word
+                    if form.tags >= Tag.LOCATIVE:
+                        obj.miejscownik = form.word
+                    if form.tags >= Tag.INSTRUMENTAL:
+                        obj.narzędnik = form.word
+                    if form.tags >= Tag.VOCATIVE:
+                        obj.wołacz = form.word
+
+        return forms if (not forms.liczba_mnoga.m1.is_empty() and not forms.liczba_pojedyncza.is_empty()) else None
+
+    def decline_noun(self, noun: str | Word):
+        def reducer(acc: Word | None, cur: Word):
+            cmp: str = noun if isinstance(noun, str) else noun.word
+            return cur if cur.lemma.to_str() == cmp else acc
+
+        if isinstance(noun, str):
+            word = reduce(
+                reducer,
+                list(self.analyze(noun)),
+                Word(word=noun, lemma=Lemma(word=noun, tags=""), tags="", data1=set(), data2=set())
+            )
+        else:
+            word = reducer(noun, noun)
 
         if word is None or not word.is_noun():
             return None
 
-        forms = NounForms(
-            rodzaj=(Tag.Gender & word.tags),
-            liczba_mnoga=CaseForms(
-                mianownik="",
-                dopełniacz="",
-                celownik="",
-                biernik="",
-                miejscownik="",
-                narzędnik="",
-                wołacz="",
-            ),
-            liczba_pojedyncza=CaseForms(
-                mianownik="",
-                dopełniacz="",
-                celownik="",
-                biernik="",
-                miejscownik="",
-                narzędnik="",
-                wołacz="",
-            ),
-        )
+        forms = NounForms.empty("")
+        forms.rodzaj = Tag(word.tags & Tag.Gender)
 
         s = word.lemma.to_str()
         generated = self.generate(s)
@@ -251,11 +381,14 @@ class Morf:
                 return cur
             return acc
 
-        word = reduce(
-            reducer,
-            list(self.analyze(verb)),
-            Word(word=verb, lemma=Lemma(word=verb, tags=""), tags="", data1=set(), data2=set())
-        ) if isinstance(verb, str) else reducer(None, verb)
+        if isinstance(verb, str):
+            word = reduce(
+                reducer,
+                list(self.analyze(verb)),
+                Word(word=verb, lemma=Lemma(word=verb, tags=""), tags="", data1=set(), data2=set())
+            )
+        else:
+            word = reducer(verb, verb)
 
         if word is None or not word.is_verb():
             return None

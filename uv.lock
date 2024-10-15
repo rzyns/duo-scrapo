@@ -618,6 +618,7 @@ dependencies = [
     { name = "attrs" },
     { name = "cattrs" },
     { name = "crawlee", extra = ["all"] },
+    { name = "genanki" },
     { name = "morfeusz2" },
     { name = "playwright" },
     { name = "pydantic" },
@@ -631,7 +632,6 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "basedpyright" },
-    { name = "genanki" },
     { name = "ipython" },
     { name = "monkeytype" },
     { name = "mypy" },
@@ -647,6 +647,7 @@ requires-dist = [
     { name = "attrs", specifier = ">=24.2.0" },
     { name = "cattrs", specifier = ">=24.1.1" },
     { name = "crawlee", extras = ["all"], specifier = ">=0.3.6" },
+    { name = "genanki", editable = "packages/genanki" },
     { name = "morfeusz2", specifier = ">=1.99.9" },
     { name = "playwright", specifier = ">=1.47.0" },
     { name = "pydantic", specifier = ">=2.9.2" },
@@ -660,7 +661,6 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "basedpyright", specifier = ">=1.18.4" },
-    { name = "genanki", editable = "packages/genanki" },
     { name = "ipython", specifier = ">=8.27.0" },
     { name = "monkeytype", specifier = ">=23.3.0" },
     { name = "mypy", specifier = ">=1.11.2" },

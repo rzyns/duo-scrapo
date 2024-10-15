@@ -1,7 +1,15 @@
 from collections.abc import Generator, Iterable
+import textwrap
+from typing import Literal, Protocol
+from collections.abc import Sized
+from attr import field
+from attrs import define
+from rich import print  # noqa: A004
 
 from duo_scrapo.Morf import Morf
 from duo_scrapo.tag import Tag
+from duo_scrapo.words.adjectives import AdjectiveForms
+from duo_scrapo.words.pronouns import PronounForms
 from duo_scrapo.words.verbs import VerbForms
 from duo_scrapo.words.nouns import NounForms
 from duo_scrapo.words.vocab import TermDefinition, load_vocabulary
@@ -110,9 +118,113 @@ def export_czasowniki(data: Iterable[TermDefinition], morf: Morf | None = None) 
                 seen_words.append(thing.lemma.word)
 
 
+@define
+class Stats:
+    vocab_count: int
+    processed: int = field(default=0)
+    adjectives: int = field(default=0)
+    nouns: int = field(default=0)
+    pronouns: int = field(default=0)
+    verbs: int = field(default=0)
+
+    def log(self, kind: Literal["adj", "noun", "verb", "pronoun"]) -> None:
+        self.processed += 1
+        if kind == "adj":
+            self.adjectives += 1
+        elif kind == "noun":
+            self.nouns += 1
+        elif kind == "pronoun":
+            self.pronouns += 1
+        elif kind == "verb":
+            self.verbs += 1
+
+    @property
+    def unhandled(self) -> int:
+        return self.vocab_count - self.adjectives - self.nouns - self.verbs
+
+    @property
+    def unprocessed(self) -> int:
+        return self.vocab_count - self.processed
+
+    def __str__(self) -> str:
+        return textwrap.dedent(f"""
+            Stats:
+                Processed: {self.processed}
+                    Adjec:     {self.adjectives}
+                    Nouns:     {self.nouns}
+                    Pronouns:  {self.pronouns}
+                    Verbs:     {self.verbs}
+                    --------------------------------
+                    Total: {self.processed}
+
+                Unhandled: {self.unhandled}
+                Unprocessed: {self.unprocessed}
+            """).lstrip()
+
+
+class SizedIterable[T](Sized, Iterable[T], Protocol):
+    pass
+
+
+def export(data: SizedIterable[TermDefinition], morf: Morf | None = None) -> Generator[tuple[TermDefinition, VerbForms | NounForms | AdjectiveForms | PronounForms, Stats]]:
+    m = morf or Morf()
+
+    seen_words: list[tuple[Literal["adj", "noun", "verb", "pronoun"], str]] = []
+    stats = Stats(vocab_count=len(data))
+
+    for vocab_word in data:
+        analysis = m.analyze(vocab_word.term)
+
+        for thing in analysis:
+            handled = False
+
+            if thing.tags & Tag.ADJECTIVE and ("adj", thing.lemma.word) not in seen_words:
+                forms = m.decline_adjective(thing)
+                if forms is not None:
+                    seen_words.append(("adj", thing.lemma.word))
+
+                    yield (vocab_word, forms, stats)
+                    handled = True
+                    stats.log("adj")
+
+            if thing.tags & Tag.Aspect and ("verb", thing.lemma.word) not in seen_words:
+                forms = m.conjugate_verb(thing)
+                if forms is not None:
+                    yield (vocab_word, forms, stats)
+
+                    seen_words.append(("verb", thing.lemma.word))
+                    handled = True
+                    stats.log("verb")
+
+            if thing.tags & Tag.Case and ("noun", thing.lemma.word) not in seen_words:
+                forms = m.decline_noun(thing)
+                if forms is not None:
+                    seen_words.append(("noun", thing.lemma.word))
+
+                    yield (vocab_word, forms, stats)
+                    handled = True
+                    stats.log("noun")
+
+            if (thing.tags & (Tag.PPRON12 | Tag.PPRON3)) and ("pronoun", thing.lemma.word) not in seen_words:
+                forms = m.decline_pronoun(thing)
+                if forms is not None:
+                    seen_words.append(("pronoun", thing.lemma.word))
+
+                    yield (vocab_word, forms, stats)
+                    handled = True
+                    stats.log("pronoun")
+
+            if not handled and thing.lemma.word not in [w for _, w in seen_words]:
+                print(f"Unhandled: {vocab_word.term} => {thing.lemma.word} [ {thing.tags} ]")
+
+
 if __name__ == "__main__":
     data = load_vocabulary()
     m = Morf(dict_names=["sgjp"])
 
-    export_czasowniki(data, m)
-    export_rzeczowniki(data, m)
+    stats: Stats | None = None
+    for _, __, stats_ in export(data, m):
+        stats = stats_
+
+    if stats is not None:
+        print(str(stats))

@@ -8,13 +8,13 @@ from rich import print  # noqa: A004
 
 from duo_scrapo.Morf import Morf
 from duo_scrapo.tag import Tag
-from duo_scrapo.words.przymiotniki import AdjectiveForms
-from duo_scrapo.words.przysłówki import AdverbForms
-from duo_scrapo.words.przyimki import PrepositionForms
-from duo_scrapo.words.zaimki import PronounForms
-from duo_scrapo.words.czasowniki import VerbForms
-from duo_scrapo.words.rzeczowniki import NounForms
-from duo_scrapo.words.vocab import TermDefinition, load_vocabulary
+from duo_scrapo.słowa.przymiotniki import AdjectiveForms
+from duo_scrapo.słowa.przysłówki import AdverbForms
+from duo_scrapo.słowa.przyimki import PrepositionForms
+from duo_scrapo.słowa.zaimki import PronounForms
+from duo_scrapo.słowa.czasowniki import VerbForms
+from duo_scrapo.słowa.rzeczowniki import NounForms
+from duo_scrapo.słowa.słownictwo import TermDefinition, load_vocabulary
 
 
 type SomeType = Literal["adj", "noun", "verb", "pronoun", "preposition", "adverb"]

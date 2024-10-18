@@ -5,10 +5,10 @@ from collections.abc import Iterable, Iterator, Set, Hashable
 from morfeusz2 import Morfeusz
 from attrs import define, field
 
-from duo_scrapo.words.przymiotniki import AdjectiveForms, CaseForms
-from duo_scrapo.words import GenderedSingular
-from duo_scrapo.words.przyimki import BasePrepositionForms, PrepositionForms
-from duo_scrapo.words.zaimki import PronounForms
+from duo_scrapo.słowa.przymiotniki import AdjectiveForms, CaseForms
+from duo_scrapo.słowa import GenderedSingular
+from duo_scrapo.słowa.przyimki import BasePrepositionForms, PrepositionForms
+from duo_scrapo.słowa.zaimki import PronounForms
 
 from .tag import Tag
 from .words.nouns import NounForms

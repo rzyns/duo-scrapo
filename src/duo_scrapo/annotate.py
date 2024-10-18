@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict, TomlConfigSettingsSource
 
 from duo_scrapo.Morf import Morf, Word
-from duo_scrapo.words.vocab import TermDefinition
+from duo_scrapo.słowa.słownictwo import TermDefinition
 
 type Data = tuple[str, str, str, list[str], list[str]]
 type Interp = tuple[int, int, Data]

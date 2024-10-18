@@ -3,7 +3,7 @@ import json
 
 import cattrs
 
-from duo_scrapo.words.vocab import TermDefinition
+from duo_scrapo.słowa.słownictwo import TermDefinition
 
 from .Morf import Morf, Word
 

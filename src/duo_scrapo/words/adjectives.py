@@ -1,35 +1,11 @@
-from collections.abc import Callable
-from typing import NamedTuple, Self
+from typing import NamedTuple
 from attrs import define
-import attr
 
-from duo_scrapo.words.forms import SupportsEmpty, Gendered, GenderedPlural, GenderedSingular
+from duo_scrapo.words import CaseForms, Gendered, GenderedPlural, GenderedSingular
+from attrs import asdict
+from genanki.model import Model
 
-
-@define
-class CaseForms[T = str](SupportsEmpty[T]):  # noqa: E251
-    mianownik: T
-    dopełniacz: T
-    celownik: T
-    biernik: T
-    miejscownik: T
-    narzędnik: T
-    wołacz: T
-
-    @classmethod
-    def empty(cls, empty: T | Callable[[], T]) -> Self:
-        return cls(
-            mianownik=empty if not callable(empty) else empty(),
-            dopełniacz=empty if not callable(empty) else empty(),
-            celownik=empty if not callable(empty) else empty(),
-            biernik=empty if not callable(empty) else empty(),
-            miejscownik=empty if not callable(empty) else empty(),
-            narzędnik=empty if not callable(empty) else empty(),
-            wołacz=empty if not callable(empty) else empty(),
-        )
-
-    def is_empty(self) -> bool:
-        return not any(attr.asdict(self).values())
+from duo_scrapo.templates import AnkiTemplate, cond, dedent, end_cond, field, front, humanize_gender, humanize_number
 
 
 class CsvRow(NamedTuple):
@@ -216,3 +192,105 @@ class AdjectiveForms(Gendered[CaseForms]):
             self.liczba_mnoga.reszta.miejscownik,     # "lm_r_miejscownik",
             self.liczba_mnoga.reszta.wołacz,          # "lm_r_wołacz",
         )
+
+
+def humanize_col_name(col_name: str) -> str:
+    match col_name.split("_"):
+        case [(number), (gender), (case)]:
+            return " ".join(
+                [
+                    humanize_gender(gender),
+                    humanize_number(number),
+                    case,
+                ]
+            )
+        case [(number), (gender), (case)]:
+            return " ".join(
+                [
+                    humanize_gender(gender),
+                    humanize_number(number),
+                    f"({case})",
+                ]
+            )
+        case _:
+            return col_name.capitalize()
+
+
+class TplA(AnkiTemplate):
+    pass
+
+
+class TplB(AnkiTemplate):
+    pass
+
+
+def _make_declension_table() -> str:
+    return dedent("""
+    """)
+
+
+def _make_template(col: str):
+    return AnkiTemplate(
+        name=humanize_col_name(col),
+        qfmt=dedent(
+            f"""
+            {cond(col)}
+                {field('bezokolicznik')} ({humanize_col_name(col)})
+                <p>{field(f"type:{col}")}</p>
+            {end_cond(col)}
+            """
+        ),
+        afmt=dedent(
+            f"""
+            {front()}
+
+            <hr id="answer">
+
+            <p class="field-{col}">
+                {field(col)}
+            </p>
+            <p class="field-en">
+                {field("en")}
+            </p>
+            <hr id="conjugation">
+            {_make_declension_table()}
+            """
+        ),
+    )
+
+
+templates = [
+    _make_template(col)
+    for col in filter(
+        lambda name: name not in {"en", "pl"},
+        AdjectiveForms.get_cols(),
+    )
+]
+
+
+MODEL_ID_PRZYMIOTNIKI = 2120170845
+
+model = Model(
+    model_id=MODEL_ID_PRZYMIOTNIKI,
+    name="Przymiotniki",
+    fields=[
+        {"name": col}
+        for col in ("en", "pl", *AdjectiveForms.get_cols())
+    ],
+    templates=[
+        asdict(a)
+        for a in templates
+    ],
+    css=dedent("""
+        table {
+            font-size: .75rem;
+            line-height: 1rem;
+            margin-bottom: .5rem;
+            margin-top: .5rem;
+            width: 100%;
+        }
+        th { background-color: silver; }
+        td { border: 1px solid black; }
+
+    """)
+)

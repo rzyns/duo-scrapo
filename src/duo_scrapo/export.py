@@ -9,10 +9,18 @@ from rich import print  # noqa: A004
 from duo_scrapo.Morf import Morf
 from duo_scrapo.tag import Tag
 from duo_scrapo.words.adjectives import AdjectiveForms
+from duo_scrapo.words.adverbs import AdverbForms
+from duo_scrapo.words.prepositions import PrepositionForms
 from duo_scrapo.words.pronouns import PronounForms
 from duo_scrapo.words.verbs import VerbForms
 from duo_scrapo.words.nouns import NounForms
 from duo_scrapo.words.vocab import TermDefinition, load_vocabulary
+
+
+type SomeType = Literal["adj", "noun", "verb", "pronoun", "preposition", "adverb"]
+
+
+type SomeForm = VerbForms | NounForms | AdjectiveForms | PronounForms | PrepositionForms | AdverbForms
 
 
 def export_rzeczowniki(data: Iterable[TermDefinition], morf: Morf | None = None) -> Generator[tuple[TermDefinition, NounForms]]:
@@ -127,7 +135,7 @@ class Stats:
     pronouns: int = field(default=0)
     verbs: int = field(default=0)
 
-    def log(self, kind: Literal["adj", "noun", "verb", "pronoun"]) -> None:
+    def log(self, kind: SomeType) -> None:
         self.processed += 1
         if kind == "adj":
             self.adjectives += 1
@@ -166,10 +174,10 @@ class SizedIterable[T](Sized, Iterable[T], Protocol):
     pass
 
 
-def export(data: SizedIterable[TermDefinition], morf: Morf | None = None) -> Generator[tuple[TermDefinition, VerbForms | NounForms | AdjectiveForms | PronounForms, Stats]]:
+def export(data: SizedIterable[TermDefinition], morf: Morf | None = None) -> Generator[tuple[TermDefinition, SomeForm, Stats]]:
     m = morf or Morf()
 
-    seen_words: list[tuple[Literal["adj", "noun", "verb", "pronoun"], str]] = []
+    seen_words: list[tuple[SomeType, str]] = []
     stats = Stats(vocab_count=len(data))
 
     for vocab_word in data:
@@ -178,44 +186,55 @@ def export(data: SizedIterable[TermDefinition], morf: Morf | None = None) -> Gen
         for thing in analysis:
             handled = False
 
-            if thing.tags & Tag.ADJECTIVE and ("adj", thing.lemma.word) not in seen_words:
+            if thing.is_adj() and ("adj", thing.lemma.word) not in seen_words:
                 forms = m.decline_adjective(thing)
                 if forms is not None:
                     seen_words.append(("adj", thing.lemma.word))
-
-                    yield (vocab_word, forms, stats)
                     handled = True
                     stats.log("adj")
-
-            if thing.tags & Tag.Aspect and ("verb", thing.lemma.word) not in seen_words:
-                forms = m.conjugate_verb(thing)
-                if forms is not None:
                     yield (vocab_word, forms, stats)
 
+            if thing.is_verb() and ("verb", thing.lemma.word) not in seen_words:
+                forms = m.conjugate_verb(thing)
+                if forms is not None:
                     seen_words.append(("verb", thing.lemma.word))
                     handled = True
                     stats.log("verb")
+                    yield (vocab_word, forms, stats)
 
-            if thing.tags & Tag.Case and ("noun", thing.lemma.word) not in seen_words:
+            if thing.is_noun() and ("noun", thing.lemma.word) not in seen_words:
                 forms = m.decline_noun(thing)
                 if forms is not None:
                     seen_words.append(("noun", thing.lemma.word))
-
-                    yield (vocab_word, forms, stats)
                     handled = True
                     stats.log("noun")
+                    yield (vocab_word, forms, stats)
 
-            if (thing.tags & (Tag.PPRON12 | Tag.PPRON3)) and ("pronoun", thing.lemma.word) not in seen_words:
+            if thing.is_pronoun() and ("pronoun", thing.lemma.word) not in seen_words:
                 forms = m.decline_pronoun(thing)
                 if forms is not None:
                     seen_words.append(("pronoun", thing.lemma.word))
-
-                    yield (vocab_word, forms, stats)
                     handled = True
                     stats.log("pronoun")
+                    yield (vocab_word, forms, stats)
+
+            if thing.is_preposition() and ("preposition", thing.lemma.word) not in seen_words:
+                forms = m.get_preposition_supported_cases(thing)
+                if forms is not None:
+                    seen_words.append(("preposition", thing.lemma.word))
+                    handled = True
+                    stats.log("preposition")
+                    yield (vocab_word, forms, stats)
+
+            if thing.is_adv() and ("adverb", thing.lemma.word) not in seen_words:
+                forms = AdverbForms(form=thing.lemma.word)
+                seen_words.append(("adverb", thing.lemma.word))
+                handled = True
+                stats.log("adverb")
+                yield (vocab_word, forms, stats)
 
             if not handled and thing.lemma.word not in [w for _, w in seen_words]:
-                print(f"Unhandled: {vocab_word.term} => {thing.lemma.word} [ {thing.tags} ]")
+                print(f"Unhandled: {vocab_word.term} => {thing.lemma} [ {thing.tags} ]")
 
 
 if __name__ == "__main__":

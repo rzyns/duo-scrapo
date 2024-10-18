@@ -67,7 +67,7 @@ select = [
 ]
 ignore = [
     "E501", "S101", "PLR0913", "PLR0917", "PLR0912", "PLR6301", "FBT001",
-    "FBT002", "S113", "ISC001", "PLC2401", "PLC0414", "PLR0915", "PLR0911"
+    "FBT002", "S113", "ISC001", "PLC2401", "PLC2403", "PLC0414", "PLR0915", "PLR0911"
 ]
 
 [tool.ruff.lint.extend-per-file-ignores]

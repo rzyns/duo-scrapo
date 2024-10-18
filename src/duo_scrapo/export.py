@@ -8,22 +8,22 @@ from rich import print  # noqa: A004
 
 from duo_scrapo.Morf import Morf
 from duo_scrapo.tag import Tag
-from duo_scrapo.słowa.przymiotniki import AdjectiveForms
-from duo_scrapo.słowa.przysłówki import AdverbForms
-from duo_scrapo.słowa.przyimki import PrepositionForms
-from duo_scrapo.słowa.zaimki import PronounForms
-from duo_scrapo.słowa.czasowniki import VerbForms
-from duo_scrapo.słowa.rzeczowniki import NounForms
+from duo_scrapo.słowa.przymiotniki import FormyPrzymiotników
+from duo_scrapo.słowa.przysłówki import FormyPrzysłówków
+from duo_scrapo.słowa.przyimki import FormyPrzyimków
+from duo_scrapo.słowa.zaimki import FormyZaimków
+from duo_scrapo.słowa.czasowniki import FormyCzasowników
+from duo_scrapo.słowa.rzeczowniki import FormyRzeczowników
 from duo_scrapo.słowa.słownictwo import TermDefinition, load_vocabulary
 
 
 type SomeType = Literal["adj", "noun", "verb", "pronoun", "preposition", "adverb"]
 
 
-type SomeForm = VerbForms | NounForms | AdjectiveForms | PronounForms | PrepositionForms | AdverbForms
+type SomeForm = FormyCzasowników | FormyRzeczowników | FormyPrzymiotników | FormyZaimków | FormyPrzyimków | FormyPrzysłówków
 
 
-def export_rzeczowniki(data: Iterable[TermDefinition], morf: Morf | None = None) -> Generator[tuple[TermDefinition, NounForms]]:
+def export_rzeczowniki(data: Iterable[TermDefinition], morf: Morf | None = None) -> Generator[tuple[TermDefinition, FormyRzeczowników]]:
     m = morf or Morf()
 
     seen_words: list[str] = []
@@ -42,7 +42,7 @@ def export_rzeczowniki(data: Iterable[TermDefinition], morf: Morf | None = None)
                 yield (vocab_word, forms)
 
 
-def zexport_rzeczowniki(data: Iterable[TermDefinition], morf: Morf | None = None) -> Generator[tuple[TermDefinition, NounForms]]:
+def zexport_rzeczowniki(data: Iterable[TermDefinition], morf: Morf | None = None) -> Generator[tuple[TermDefinition, FormyRzeczowników]]:
     columns = [
         "pl",
         "en",
@@ -108,7 +108,7 @@ def export_przymiotniki():
     pass
 
 
-def export_czasowniki(data: Iterable[TermDefinition], morf: Morf | None = None) -> Generator[tuple[TermDefinition, VerbForms]]:
+def export_czasowniki(data: Iterable[TermDefinition], morf: Morf | None = None) -> Generator[tuple[TermDefinition, FormyCzasowników]]:
     m = morf or Morf()
 
     seen_words: list[str] = []
@@ -227,7 +227,7 @@ def export(data: SizedIterable[TermDefinition], morf: Morf | None = None) -> Gen
                     yield (vocab_word, forms, stats)
 
             if thing.is_adv() and ("adverb", thing.lemma.word) not in seen_words:
-                forms = AdverbForms(form=thing.lemma.word)
+                forms = FormyPrzysłówków(form=thing.lemma.word)
                 seen_words.append(("adverb", thing.lemma.word))
                 handled = True
                 stats.log("adverb")

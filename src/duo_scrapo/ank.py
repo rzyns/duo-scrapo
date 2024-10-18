@@ -23,12 +23,12 @@ import duo_scrapo.słowa.przyimki
 import duo_scrapo.słowa.zaimki
 import duo_scrapo.słowa.czasowniki
 
-from duo_scrapo.słowa.przymiotniki import AdjectiveForms
-from duo_scrapo.słowa.przysłówki import AdverbForms
-from duo_scrapo.słowa.rzeczowniki import NounForms
-from duo_scrapo.słowa.przyimki import PrepositionForms
-from duo_scrapo.słowa.zaimki import PronounForms
-from duo_scrapo.słowa.czasowniki import VerbForms
+from duo_scrapo.słowa.przymiotniki import FormyPrzymiotników
+from duo_scrapo.słowa.przysłówki import FormyPrzysłówków
+from duo_scrapo.słowa.rzeczowniki import FormyRzeczowników
+from duo_scrapo.słowa.przyimki import FormyPrzyimków
+from duo_scrapo.słowa.zaimki import FormyZaimków
+from duo_scrapo.słowa.czasowniki import FormyCzasowników
 
 from duo_scrapo.słowa.słownictwo import load_vocabulary
 import genanki
@@ -204,7 +204,7 @@ def add_czasowniki_to_collection(col: anki.collection.Collection, collection_nam
     # Dodaj pola do typu notatki
     # add_fields_to_note_type(col, new_note_type, ("Front", "Back", "pl", "en"))
     add_fields_to_note_type(col, czasowniki, ("pl", "en"))
-    add_fields_to_note_type(col, czasowniki, VerbForms.get_cols())
+    add_fields_to_note_type(col, czasowniki, FormyCzasowników.get_cols())
 
     seen: list[str] = []
     # Dodaj szablon do typu notatki
@@ -246,7 +246,7 @@ def add_rzeczowniki_to_collection(col: anki.collection.Collection, collection_na
 
     # Dodaj pola do typu notatki
     add_fields_to_note_type(col, rzeczowniki, ("pl", "en"))
-    add_fields_to_note_type(col, rzeczowniki, NounForms.get_cols())
+    add_fields_to_note_type(col, rzeczowniki, FormyRzeczowników.get_cols())
 
     rzeczowniki["tmpls"].clear()
     # Dodaj szablon do typu notatki
@@ -322,17 +322,17 @@ def main():
         fields = (word.definition, word.term, *forms.to_rows())
 
         match forms:
-            case VerbForms():
+            case FormyCzasowników():
                 model = duo_scrapo.słowa.czasowniki.model
-            case NounForms():
+            case FormyRzeczowników():
                 model = duo_scrapo.słowa.rzeczowniki.model
-            case PronounForms():
+            case FormyZaimków():
                 model = duo_scrapo.słowa.zaimki.model
-            case AdjectiveForms():
+            case FormyPrzymiotników():
                 model = duo_scrapo.słowa.przymiotniki.model
-            case AdverbForms():
+            case FormyPrzysłówków():
                 model = duo_scrapo.słowa.przysłówki.model
-            case PrepositionForms():
+            case FormyPrzyimków():
                 model = duo_scrapo.słowa.przyimki.model
 
         deck.add_note(genanki.note.Note(

@@ -5,14 +5,14 @@ from collections.abc import Iterable, Iterator, Set, Hashable
 from morfeusz2 import Morfeusz
 from attrs import define, field
 
-from duo_scrapo.słowa.przymiotniki import AdjectiveForms, CaseForms
-from duo_scrapo.słowa import GenderedSingular
-from duo_scrapo.słowa.przyimki import BasePrepositionForms, PrepositionForms
-from duo_scrapo.słowa.zaimki import PronounForms
+from duo_scrapo.słowa.przymiotniki import FormyPrzymiotników
+from duo_scrapo.słowa import GenderedSingular, FormyPrzypadków
+from duo_scrapo.słowa.przyimki import BasePrepositionForms, FormyPrzyimków
+from duo_scrapo.słowa.zaimki import FormyZaimków
 
 from .tag import Tag
-from .words.nouns import NounForms
-from .words.verbs import VerbForms
+from duo_scrapo.słowa.rzeczowniki import FormyRzeczowników
+from duo_scrapo.słowa.czasowniki import FormyCzasowników
 
 
 @define(hash=True)
@@ -224,14 +224,14 @@ class Morf:
         if word is None or not word.is_adj():
             return None
 
-        forms = AdjectiveForms.empty(lambda: CaseForms.empty(lambda: ""))
+        forms = FormyPrzymiotników.empty(lambda: FormyPrzypadków.empty(lambda: ""))
 
         s = word.lemma.to_str()
         generated = self.generate(s)
         for form in generated:
             numbers = Tag.Number & form.tags
             genders = Tag.Gender & form.tags
-            obj: CaseForms
+            obj: FormyPrzypadków
             # obj = forms.liczba_mnoga if number == Tag.PLURAL else forms.liczba_pojedyncza
             for number in numbers:
                 for gender in genders:
@@ -294,9 +294,9 @@ class Morf:
         if word is None or not word.is_pron():
             return None
 
-        forms = PronounForms.empty(
-            empty_lm=lambda: GenderedSingular[CaseForms[str]].empty(lambda: CaseForms.empty(lambda: "")),
-            empty_lp=lambda: GenderedSingular[CaseForms[str]].empty(lambda: CaseForms.empty(lambda: "")),
+        forms = FormyZaimków.empty(
+            empty_lm=lambda: GenderedSingular[FormyPrzypadków[str]].empty(lambda: FormyPrzypadków.empty(lambda: "")),
+            empty_lp=lambda: GenderedSingular[FormyPrzypadków[str]].empty(lambda: FormyPrzypadków.empty(lambda: "")),
         )
 
         s = word.lemma.to_str()
@@ -304,7 +304,7 @@ class Morf:
         for form in generated:
             numbers = Tag.Number & form.tags
             genders = Tag.Gender & form.tags
-            obj: CaseForms
+            obj: FormyPrzypadków
             # obj = forms.liczba_mnoga if number == Tag.PLURAL else forms.liczba_pojedyncza
             for number in numbers:
                 for gender in genders:
@@ -357,7 +357,7 @@ class Morf:
         if word is None or not word.is_noun():
             return None
 
-        forms = NounForms.empty(lambda: "")
+        forms = FormyRzeczowników.empty(lambda: "")
         forms.rodzaj = Tag(word.tags & Tag.Gender)
 
         s = word.lemma.to_str()
@@ -403,7 +403,7 @@ class Morf:
 
         aspekt = Tag.Aspect & word.tags
 
-        forms = VerbForms(aspekt=aspekt)
+        forms = FormyCzasowników(aspekt=aspekt)
 
         s = word.lemma.to_str()
         generated = self.generate(s)
@@ -458,7 +458,7 @@ class Morf:
         if word is None or not word.is_preposition():
             return None
 
-        forms = PrepositionForms.empty(lambda: BasePrepositionForms(
+        forms = FormyPrzyimków.empty(lambda: BasePrepositionForms(
             preposition=word.lemma.to_str(),
             takes_mianownik=False,
             takes_dopełniacz=False,

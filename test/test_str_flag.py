@@ -1,9 +1,9 @@
 import pytest
 from enum import Enum, Flag, auto
-from . import flag as _
+from duo_scrapo import flag
 
 
-class FLG(_.Flag):
+class FLG(flag.Flag):
     A = "a"
     B = "b"
     C = "c"

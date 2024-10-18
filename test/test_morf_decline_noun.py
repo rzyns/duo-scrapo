@@ -1,5 +1,5 @@
-from .Morf import Morf
-from .tag import Tag
+from duo_scrapo.Morf import Morf
+from duo_scrapo.tag import Tag
 
 
 def test_morf_conjugate_osiągnąć():

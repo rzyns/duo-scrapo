@@ -8,12 +8,12 @@ from rich import print  # noqa: A004
 
 from duo_scrapo.Morf import Morf
 from duo_scrapo.tag import Tag
-from duo_scrapo.words.adjectives import AdjectiveForms
-from duo_scrapo.words.adverbs import AdverbForms
-from duo_scrapo.words.prepositions import PrepositionForms
-from duo_scrapo.words.pronouns import PronounForms
-from duo_scrapo.words.verbs import VerbForms
-from duo_scrapo.words.nouns import NounForms
+from duo_scrapo.words.przymiotniki import AdjectiveForms
+from duo_scrapo.words.przysłówki import AdverbForms
+from duo_scrapo.words.przyimki import PrepositionForms
+from duo_scrapo.words.zaimki import PronounForms
+from duo_scrapo.words.czasowniki import VerbForms
+from duo_scrapo.words.rzeczowniki import NounForms
 from duo_scrapo.words.vocab import TermDefinition, load_vocabulary
 
 

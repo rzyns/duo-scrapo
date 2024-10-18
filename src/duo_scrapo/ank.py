@@ -16,19 +16,19 @@ from rich import print  # noqa: A004
 
 from duo_scrapo.templates import AnkiTemplate, dedent
 from duo_scrapo.export import export, export_czasowniki, export_rzeczowniki
-import duo_scrapo.words.adjectives
-import duo_scrapo.words.adverbs
-import duo_scrapo.words.nouns
-import duo_scrapo.words.prepositions
-import duo_scrapo.words.pronouns
-import duo_scrapo.words.verbs
+import duo_scrapo.words.przymiotniki
+import duo_scrapo.words.przysłówki
+import duo_scrapo.words.rzeczowniki
+import duo_scrapo.words.przyimki
+import duo_scrapo.words.zaimki
+import duo_scrapo.words.czasowniki
 
-from duo_scrapo.words.adjectives import AdjectiveForms
-from duo_scrapo.words.adverbs import AdverbForms
-from duo_scrapo.words.nouns import NounForms
-from duo_scrapo.words.prepositions import PrepositionForms
-from duo_scrapo.words.pronouns import PronounForms
-from duo_scrapo.words.verbs import VerbForms
+from duo_scrapo.words.przymiotniki import AdjectiveForms
+from duo_scrapo.words.przysłówki import AdverbForms
+from duo_scrapo.words.rzeczowniki import NounForms
+from duo_scrapo.words.przyimki import PrepositionForms
+from duo_scrapo.words.zaimki import PronounForms
+from duo_scrapo.words.czasowniki import VerbForms
 
 from duo_scrapo.words.vocab import load_vocabulary
 import genanki
@@ -199,7 +199,7 @@ def add_czasowniki_to_collection(col: anki.collection.Collection, collection_nam
         czasowniki = col.models.new("Czasowniki")
 
     czasowniki = to_model(czasowniki)
-    czasowniki["id"] = duo_scrapo.words.verbs.MODEL_ID_CZASOWNIKI
+    czasowniki["id"] = duo_scrapo.words.czasowniki.MODEL_ID_CZASOWNIKI
 
     # Dodaj pola do typu notatki
     # add_fields_to_note_type(col, new_note_type, ("Front", "Back", "pl", "en"))
@@ -208,7 +208,7 @@ def add_czasowniki_to_collection(col: anki.collection.Collection, collection_nam
 
     seen: list[str] = []
     # Dodaj szablon do typu notatki
-    for tpl in duo_scrapo.words.verbs.templates:
+    for tpl in duo_scrapo.words.czasowniki.templates:
         add_template(col, czasowniki, tpl)
         seen.append(tpl.qfmt)
 
@@ -242,7 +242,7 @@ def add_rzeczowniki_to_collection(col: anki.collection.Collection, collection_na
         rzeczowniki = col.models.new("Rzeczowniki")
 
     rzeczowniki = to_model(rzeczowniki)
-    rzeczowniki["id"] = duo_scrapo.words.nouns.MODEL_ID_RZECZOWNIKI
+    rzeczowniki["id"] = duo_scrapo.words.rzeczowniki.MODEL_ID_RZECZOWNIKI
 
     # Dodaj pola do typu notatki
     add_fields_to_note_type(col, rzeczowniki, ("pl", "en"))
@@ -250,7 +250,7 @@ def add_rzeczowniki_to_collection(col: anki.collection.Collection, collection_na
 
     rzeczowniki["tmpls"].clear()
     # Dodaj szablon do typu notatki
-    for tpl in duo_scrapo.words.nouns.templates:
+    for tpl in duo_scrapo.words.rzeczowniki.templates:
         add_template(col, rzeczowniki, tpl)
 
     if rzeczowniki["id"]:
@@ -323,17 +323,17 @@ def main():
 
         match forms:
             case VerbForms():
-                model = duo_scrapo.words.verbs.model
+                model = duo_scrapo.words.czasowniki.model
             case NounForms():
-                model = duo_scrapo.words.nouns.model
+                model = duo_scrapo.words.rzeczowniki.model
             case PronounForms():
-                model = duo_scrapo.words.pronouns.model
+                model = duo_scrapo.words.zaimki.model
             case AdjectiveForms():
-                model = duo_scrapo.words.adjectives.model
+                model = duo_scrapo.words.przymiotniki.model
             case AdverbForms():
-                model = duo_scrapo.words.adverbs.model
+                model = duo_scrapo.words.przysłówki.model
             case PrepositionForms():
-                model = duo_scrapo.words.prepositions.model
+                model = duo_scrapo.words.przyimki.model
 
         deck.add_note(genanki.note.Note(
             model=model,

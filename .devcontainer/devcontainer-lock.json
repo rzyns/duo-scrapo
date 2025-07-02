@@ -1,9 +1,9 @@
 {
   "features": {
     "ghcr.io/itsmechlark/features/1password:1": {
-      "version": "1.2.0",
-      "resolved": "ghcr.io/itsmechlark/features/1password@sha256:b1afa069f1c62f30721abe65cf55494ee89b2f248e94f7fdf207f62776743044",
-      "integrity": "sha256:b1afa069f1c62f30721abe65cf55494ee89b2f248e94f7fdf207f62776743044"
+      "version": "1.4.0",
+      "resolved": "ghcr.io/itsmechlark/features/1password@sha256:6f24498ab5bcbb3112d925963025d480d58c41fd82b9edc24e350e0964852e0d",
+      "integrity": "sha256:6f24498ab5bcbb3112d925963025d480d58c41fd82b9edc24e350e0964852e0d"
     },
     "ghcr.io/rio/features/chezmoi:1": {
       "version": "1.1.0",
